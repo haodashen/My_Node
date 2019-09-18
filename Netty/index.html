@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <script type="text/javascript">
+            var socket ;
+           // var obj = document.getElementById("responseText");
+            if(window.WebSocket)
+            {
+                socket = new WebSocket("ws://127.0.0.1:6767/ws")
+                socket.onmessage = function(ev)
+                {
+				   var obj = document.getElementById("responseText");
+                    obj.value +="\n"+ev.data;
+                }
+                socket.onopen = function(ev){
+				 var obj = document.getElementById("responseText");
+                    obj.value = "连接建立";
+                }
+                socket.onclose = function(ev){
+				 var obj = document.getElementById("responseText");
+					if(obj.value==''){
+						obj.value+='连接关闭';
+					}else{
+					 obj.value+="\n"+'连接关闭';
+					}
+                }
+            }
+            else
+            {
+                alert("浏览器不支持WebSocket");
+            }
+
+        function send(msg)
+        {
+   
+            if(socket.readyState == WebSocket.OPEN){
+                socket.send(msg);
+            }else{
+                alert("连接尚未开启！");
+            }
+
+        }
+    </script>
+</head>
+<body>
+    <form onsubmit="return 'false'">
+        <textarea rows="10" cols="20" name="message" id="sendMsg"></textarea>
+        <input type="button" name="" value="发送数据" 
+				onclick='send(this.form.message.value)'/><br><br>
+        <hr style="width:1000px;" />
+        <textarea rows="10" cols="50" name="" id="responseText"></textarea>
+        <input type="button" name="" value="清空内容"
+               onclick="javascript:document.getElementById('responseText').value=''"/><br><br>
+    </form>
+</body>
+</html>

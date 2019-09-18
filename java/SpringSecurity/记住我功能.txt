@@ -1,0 +1,32 @@
+1.RememberMeAuthenticationFilter过滤器，过滤器作用在BasicAuthenticationFilter之后，
+
+第一步:配置TokenRepository
+
+    //这里我是用的是阿里的数据源
+    @Autowired
+    private DruidDataSource druidDataSource ;
+
+
+    @Bean
+    public JdbcTokenRepositoryImpl createTokenRepository()
+    {
+        JdbcTokenRepositoryImpl jtri = new JdbcTokenRepositoryImpl();
+        jtri.setDataSource(druidDataSource);
+        //创建储存token的表，在创建之后应该改为false
+        jtri.setCreateTableOnStartup(true);  
+        return jtri ;
+    }
+第二步：注入UserDetailService实现类，将程序从数据库表（persistent_logins）读取的token保存到UserDetailService中。
+
+	@Autowired
+        private UserDetailsService userDetailsService ;
+
+第三步：在重写的WebSecurityConfigurerAdapter的configure添加配置
+	.rememberMe()
+                .tokenRepository(createTokenRepository())    
+                .tokenValiditySeconds(3600)   //设置token的有效时间
+                .and()
+
+
+
+参考：https://niocoder.com/2018/01/17/Spring-Security源码分析七-Spring-Security-记住我/

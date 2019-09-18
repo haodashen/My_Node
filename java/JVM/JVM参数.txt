@@ -1,0 +1,61 @@
+﻿堆空间设置：
+	-Xms:堆的最小值
+	-Xmx:堆的最大值
+堆溢出处理:
+	-XX:HeapDumpOnOutOfMemoryError:让虚拟机在出现内存出现溢出异常时Dump出当前的内存堆转储快照以便事后尽心分析（导出整个堆信息）
+	-XX:HeapDumpPath:指定导出堆的存放路径。
+	
+栈空间设置：
+	-Xss:栈大小
+
+直接内存设置：
+	-XX:MaxDirectMemorySize：设置直接内存大小
+
+方法区内存设置（jdk1.6和jdk1.7，在jdk1.8中永久区被彻底删除，使用新的元数据区存放类的元数据）：
+	 -XX:PermSize：初始的永久区大小
+	 -XX:MaxPermSize：最大的永久区
+
+新生代内存设置：
+	-Xmn：设置新生代的大小，新生代一般设置为整个堆空间的1/3到1/4左右。
+	-XX:SurvivorRatio：用来设置新生代中eden空间和from/to空间的比例关系
+	-XX:NewRatio：用来设置新生代和老生代的比例  -XX:NewRatio=老生代/新生代
+
+开启GC日志：
+	-verbose:gc（开启打印垃圾回收日志）
+	-Xloggc:eclipse_gc.log（设置垃圾回收日志打印的文件，文件名自定义）
+	-XX:+PrintGCTimeStamps（打印垃圾回收时间信息的时间格式）
+	-XX:+PrintGCDateStamps
+	-XX:+PrintGCApplicationConcurrentTime（打印应用程序执行时间）
+	-XX:+PrintGCApplicationStoppedTime（打印应用程序由于GC而产生的停顿时间）
+	-XX:+PrintHeapAtGC(每次在GC前后打印堆信息)
+	-XX:+PrintGCDetails（打印垃圾回收详情）
+	-XX:+PrintReferenceGC（打开系统内的软引用，弱引用，虚引用和Finalize队列）
+
+类的跟踪和卸载：
+	-verbose:class（跟踪类的加载和卸载）
+	-XX:+TranceClassLoading（跟踪类的加载）
+	-XX:+TranceClassUnloading（跟踪类的卸载）
+
+系统参数查看：
+	-XX:+PrintVMOptions（可以在程序运行时，打印虚拟机接受到的命令行参数）
+	-XX:PrintCommandLineFlags（打印传递给虚拟机的显示和隐式参数，隐式参数未必是通过命令行直接传递的，它可能是虚拟机自行设置的）
+	-XX:PrintFlagsFinal（打印所有的系统参数值）
+
+添加JVM监控参数:
+	-Djava.rmi.server.hostname=127.0.0.1
+	-Dcom.sun.management.jmxremote.port=6688
+	-Dcom.sun.management.jmxremote.ssl=false
+	-Dcom.sun.management.jmxremote.authenticate=false
+
+永久区（方法区）参数
+         -XX:PermSize和-XX:MaxPermSize，默认情况下，-XX:MaxPermSize为64M。
+         在jdk1.8中，永久区被取消，取而代之的为元数据区，可以使用-XX:MaxMetaspaceSize指定大小
+
+
+
+ 虚拟机工作模式：
+	  目前Java虚拟机支持两种工作模式，即Client和Server，使用-client可以指定Client模式，使用-server指定使用Server模式，虚拟机会根据系统运行环境自动选择模式。
+	与Client模式相比，Server模式启动比较慢，因为Server模式会尝试收集更多的系统性能信息，使用更复杂的算法对程序进行优化，因此，当系统运行稳定后，Server模式
+	执行速度远远高于Client模式。
+
+

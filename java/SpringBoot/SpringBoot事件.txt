@@ -1,0 +1,21 @@
+第一种方法：
+1.继承ApplicationEvent
+2.定义监听器，实现ApplicationListener接口，接口的泛型为继承了ApplicationEvent对象。
+3.添加监听 SpringApplication.addListeners(监听器对象);
+4.发布监听 ConfigurableApplicationContext.publishEvent(监听器对象);
+
+第二种方法：
+将定义的监听器注册到spirng容器中，该类使用@Component注解
+
+
+
+第三种方法：
+定义一个类，该类是@Component注解，在该类中定义一个方法，并以定义的监听器为参数（子类），该方法使用@EventListener注解，
+详细查看org.springframework.context.event.EventListenerMethodProcessor
+
+第四种：
+
+在applicatin.properties中使用context.listener.classess，详细请查看org.springframework.boot.context.config.DelegatingApplicationListener
+
+
+

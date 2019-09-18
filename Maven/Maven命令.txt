@@ -1,0 +1,26 @@
+mvn help:system：查看所有的环境变量
+
+mvn clean install -P profileId：激活一个profile
+mvn clean install -D
+
+mvn  help:active-profiles
+
+mvn help:all-profiles
+
+mvn site:stage -DstagingDirectory=D:\jar
+
+mvn archetype:generate  生成项目骨架
+
+mvn clean compile
+mvn clean test
+mvn clean package
+mvn clean install
+
+
+mvn dependency:tree
+mvn dependency:analyze
+
+从Maven项目中导出项目依赖的jar包：mvn dependency:copy-dependencies
+
+
+mvn clean package -Dmaven.test.skip=true -Pprofile_id;

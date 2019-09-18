@@ -1,0 +1,28 @@
+@Valid @NotBlack  BindingResult
+	如果在实体类中，如果需要判定实体的一个属性不能为空，我们可以使用@NotBlack注解，
+在Controller层接受实体参数时，使用@Valid进行验证，并且使用BindingResult类作为方法参数，进行错误的接受
+
+@NotNull:值不能为空。
+@Null:值必须为空
+@Pattern(regex=""):字符串必须匹配正则表达式
+@Size(min=?,max=?):集合的元素数量必须在min和max之间。
+@Emial:字符串必须是Email地址
+@Length(min=?,max=?):检验字符串的长度
+@NotBlack:字符串必须有字符
+@NotEmpty:字符串不为null，集合有元素
+@Range(min=?,max=?):数字必须大于等于min小于等于max
+@URL:字符串是合法的url
+@SafeHtml:字符串是合法的html
+@AssertFalse:值必须是false
+@AssertTrue:值必须是true
+@Future:值必须是未来的日期
+@Past:值必须是过去的日期
+@Max(value=?):数字的最大值
+@Min(value=?):数字的最小值
+@DecimalMax(max=?,inclusive=?):
+@DecimalMin(min=?,inclusive=?):
+@Digits(integer=?,fraction=?):数字检验格式，integer指定整数部分的最长长度，fraction指定小数部分的最长长度。
+
+
+
+

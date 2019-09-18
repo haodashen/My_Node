@@ -1,0 +1,49 @@
+
+添加依赖：
+	 <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+测试注解：
+	@SpringBootTest
+	@RunWith(SpringRunner.class)
+	public class UserDaoTest
+	{
+
+	}
+在测试环境下装配Bean：@TestConfiguration
+	@TestConfiguration
+	public class JdbcConfig
+	{
+	    
+	}
+
+SpringBoot在测试时，首先加载测试环境（src/test/main/resources）下的application.properties，如果没有才会加载
+
+EnvironmentTestUtils:在SpringBoot2.x已经不建议使用
+
+
+测试Web：
+   第一种：
+	@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
+	@RunWith(SpringRunner.class)
+	public class UserDaoTest
+	{
+	    @Autowired
+	    private TestRestTemplate trt ;
+
+	    @Test
+	    public void testAddUser()
+	    {
+		String object = trt.getForObject("/user/add",String.class);
+		System.out.println(object);
+	    }
+	}
+   第二种：使用注解@WebMvcTest代替@SpringBootTest启动MockMvc测试Controllercent
+            注意该注解不会加载Spring的容器，即在测试Controller是无法识别@Service和@Repository注解
+
+	    我们可以结合如下注解解决该问题：@SpringBootTest()
+					      @RunWith(SpringRunner.class)
+				              @AutoConfigureMockMvc

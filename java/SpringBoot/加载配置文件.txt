@@ -1,0 +1,153 @@
+（1）加载其他配置文件的{name}.properties可以使用jvm启动参数 --spring.config.name={name}文件的扩展名可以省略。
+（2）加载其他配置文件的{name}.properties可以使用jvm启动参数 --spring.config.location=classpath:/config/{name}.properties
+
+()spring.profiles.active={name}
+
+
+
+使用注解PropertySourcce加载classpath，file，resource中的配置文件，而类中的属性无需get和set方法，注意：该注解无法对集合和数组无效
+@PropertySource("classpath:{name}.properties")
+@PropertySource("file:filePath")
+@PropertySources()
+
+如：
+@PropertySource(value={"classpath:jdbc.properties"})
+@ConfigurationProperties(prefix="jdbc")
+@Configuration
+public class JdbcProperty
+{
+    @Value("${jdbc.url}")
+    private String url ;
+
+    @Value("${jdbc.user}")
+    private String user;
+
+    @Value("${jdbc.pwd}")
+    private String pwd ;
+
+    private List<String> hosts ;
+
+    public void show()
+    {
+        System.out.println("jdbc.url:"+this.url);
+        System.out.println("jdbc.user:"+this.user);
+        System.out.println("jdbc.pwd:"+this.pwd);
+    }
+}
+jdbc.properties:
+	jdbc.url=jdbc:mysql://127.0.0.1:3306/mybatis
+	jdbc.user=root
+	jdbc.pwd=lsh159
+
+
+
+
+我们可以使用：@ConfigurationProperties(prefix="")对类中的属性和集合，数组进行赋值，但需要get和set方法
+
+
+@PropertySource(value={"classpath:jdbc.properties"})
+@ConfigurationProperties(prefix="jdbc")
+@Configuration
+public class JdbcProperty
+{
+    private String url ;
+    private String user;
+    private String pwd ;
+    private List<String> hosts ;
+
+    public String getUrl(){
+        return url;
+    }
+
+    public void setUrl(String url){
+        this.url=url;
+    }
+
+    public String getUser(){
+        return user;
+    }
+
+    public void setUser(String user){
+        this.user=user;
+    }
+
+    public String getPwd(){
+        return pwd;
+    }
+
+    public void setPwd(String pwd){
+        this.pwd=pwd;
+    }
+
+    public List<String> getHosts(){
+        return hosts;
+    }
+
+    public void setHosts(List<String> hosts){
+        this.hosts=hosts;
+    }
+
+    public void show()
+    {
+        System.out.println("jdbc.url:"+this.url);
+        System.out.println("jdbc.user:"+this.user);
+        System.out.println("jdbc.pwd:"+this.pwd);
+    }
+
+    public void showList()
+    {
+        for(String str : hosts)
+        {
+            System.out.print(str+" ");
+        }
+    }
+}
+jdbc.properties:
+	jdbc.url=jdbc:mysql://127.0.0.1:3306/mybatis
+	jdbc.user=root
+	jdbc.pwd=lsh159
+	jdbc.hosts[0]=192.168.253.120
+	jdbc.hosts[1]=192.168.253.121
+	jdbc.hosts[2]=192.168.253.122
+	jdbc.hosts[3]=192.168.253.123
+
+
+
+实现EnvironmentPostProcessor接口，并在META-INF/spring.factories注册 （重写postProcessEnvironment方法，并用），实现该接口可以加载外部配置文件，在应用程序
+上下文重新加载时。
+
+@Component
+public class MyEnvironment implements EnvironmentPostProcessor
+{
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application)
+    {
+            try(InputStream input = new FileInputStream(new File("F:\\Temp\\hao.properties")))
+            {
+                Properties properties = new Properties();
+                properties.load(input);
+                PropertiesPropertySource  pps = new PropertiesPropertySource("hao", properties);
+                environment.getPropertySources().addLast(pps);
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+    }
+}
+在META-INF目录下添加spring.factories文件，并添加如下配置：
+org.springframework.boot.env.EnvironmentPostProcessor=code.lsh.bean.MyEnvironment
+这样我们就可以获取指定目录下的配置文件中的指定的值。
+
+
+
+
+
+我们在开发，测试，上线使用不同的配置文件：如application-dev.properties,application-test.properties，application-product.properties
+我们如何选择不同的配置文件，在不同的环境中呢？
+
+我们可以使用：第一种：在application.properties配置文件中指定激活的文件spring.profiles.active={name}
+		        如：激活开发文件：spring.profiles.active=dev
+		第二种：SpringApplication.setAdditionalProfiles("{name}")   -- application-{name}.properties启动不同的配置文件
+               第三种：命令行也可以指定：spring-profiles-active=dev
+

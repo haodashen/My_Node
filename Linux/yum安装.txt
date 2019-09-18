@@ -1,0 +1,29 @@
+yum安装：yum install 全部安装
+	 yum install package 安装指定的程序包
+	 yum install groupinstall group1 安装程序组group1
+例如：yum -y groupinstall Development tools
+
+yum更新和升级: yum -y update 升级所有包，改变软件设置和系统设置，系统版本内核升级
+	       yum -y upgrade 升级所有包，不改变软件设置和系统设置，系统版本升级内核不改变
+	       yum update package1 更新指定的程序包
+	       yum check-update 检测可更新的程序
+	       yum upgrade package1 升级指定的程序包
+
+yum查询和显示:yum info package1 显示安装包信息 
+	      yum list 显示所有已安装和可以安装的程序包
+	      yum list package1 显示指定程序包安装情况
+	      yum search string 根据关键字string查找安装包
+yum删除程序:yum remove/erase package1 删除程序包package1
+	    yum groupremove gruo1 删除程序组
+	    yum deplist package1 查看程序包package1的依赖情况
+
+yum清除缓存:yum clean package 清除缓存目录下的软件包
+	    yum clean headers 清除缓存目录下的headers
+	    yum clean oldheaders 清除缓存目录下的旧headers
+	    yum makecache 重新构建缓存
+
+
+详细介绍：https://blog.51cto.com/rogerwang/1695667
+
+
+

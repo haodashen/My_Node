@@ -1,0 +1,2 @@
+     在一个转发过程中，都还是在同一个请求周期内，这也是为什么RequestDispatcher是由调用HttpServletRequest的getRequestDispat()方法取得的，所以在HttpServletRequest中使用setAttribute()方法设置属性对象，都可以在转发过程中共享。
+     可以使用HTTPServletResponse的sendRedirect()要求浏览器重新请求另一个URL，又称为重定向，使用时可指定绝对的URL或相对的URL。这个方法会在响应中设置HTTP状态码301以及Location标头，浏览器接受到这个标头，会重新使用GET方法请求指定的URL，因此地址栏上会发现URL的变更。

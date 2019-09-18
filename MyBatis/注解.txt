@@ -1,0 +1,36 @@
+@Param：被该注解修饰的变量会作为Map中的key。
+@Select
+@Results：对应于resultMap,有唯一标识id
+@Result：对应于result
+@ResultMap:可以共享@Results
+@Insert：
+@Options：
+@SelectKey
+@Update
+@Delete
+@SelectProvider
+@InsertProvider
+@UpdateProvider
+@DeleteProvider
+
+@MappedTypes
+@MappedJdbcTypes
+
+
+@Intercepts和@Signature：用来配置拦截器要拦截的接口的方法。
+
+@Intercepts 注解中的属性是一个@Signature(签名)数组，可以在同一个拦截器中
+同时拦截不同的接口和方法。
+     以拦截ResultSetHandler 接口的handleResultSets 方法为例，配置签名如下。
+           @Intercepts({
+				@Signature (
+					type = ResultSetHandler.class ,
+					method = "handleResultSets",
+					args = {Statement.class})
+			})
+
+public class ResultSetinterceptor implements Interceptor
+@Signature 注解包含以下三个属性。
+type ： 设置拦截的接口，可选值是前面提到的4 个接口。
+method ： 设置拦截接口中的方法名， 可选值是前面4 个接口对应的方法，需要和接口匹配。
+args ： 设置拦截方法的参数类型数组， 通过方法名和参数类型可以确定唯一一个方法。

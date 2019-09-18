@@ -1,0 +1,50 @@
+curl:
+lsof -i:port
+netstat -ant
+clock -w
+pkill -9
+ps -ef：显示所有进程信息
+ps -aux：列出现在所有正在内存当中的线程
+ps -axjf：列出类似程序树的程序显示
+
+    D 不可中断 uninterruptible sleep (usually IO) 
+    R 运行 runnable (on run queue) 
+    S 中断 sleeping 
+    T 停止 traced or stopped 
+    Z 僵死 a defunct (”zombie”) process 
+
+scp:
+
+top命令是Linux下常用的性能分析工具。
+top命令输出可以分为两部分：前部分是系统统计信息，后部分是进城信息。
+在统计信息中：第一行是任务队列信息，它的记过等同于uptime命令，从左到右一次表示，系统当前时间，系统运行时间，当前登录用户数，最后的load average表示系统的平均负载，即任务队列的平均长度，这3个值分别表示：1分钟，5分钟，15分钟。
+第二行是进城统计信息，分别为正在运行的进程数，睡眠进程数，停止的进程数，僵尸进程数。
+第三行是CPU统计信息，us表示用户空间的CPU占用率，sy表示内核空间CPU占用率，ni表示用户进程空间改变过优先级的进程CPU的占用率，
+	id表示空闲CPU占用率，wa表示等待输入输出的CPU时间百分比，hi表示硬件中断请求，si表示软件中断请求。
+在Men行中，从左到右，依次表示物理内存容量，已使用的物理内存，空闲物理内存，内核缓冲使用量。
+Swap行依次表示交换区总量，空闲交换区大小，缓冲交换区大小。
+
+top命令的第2部分是进程信息区，显示了系统内各个进程的资源使用情况：
+	PID:进程ID
+	USER：进程所有者
+	PR：优先级
+	NI：nice值，负值表示高优先级，正值表示优先级底
+	%CPU：上次更新到现在CPU时间占用百分比
+	TIME+：进程使用CPU时间总计，单位1/100秒
+	VIRT：进程使用的虚拟内存总量，单位kb，VIRT=SWAP+RES
+	%MEM：进程使用的物理内存百分比
+	RES：进程使用的，未被换出的物理内存大小，单位kb，RES=CODE+DATA
+	SHR：共享内存大小，单位kb。
+	COMMAND：命令名/命令行
+
+
+echo $BASH_VERSION：查看Bash Shell版本。
+
+/etc/profile.d：
+
+系统启动加载文件：/etc/profile  --->  .bash_profile（如果不存在，加载.bash_login，如果.bash_login不存在，加载.profile）---->                   .bashrc
+用户主目录下以“.”开头的隐藏文件是使用useradd命令创建用户时/etc/skel目录下的文件副本。
+
+
+重定向：>  >>  2> 2>> &> &>>
+

@@ -1,0 +1,35 @@
+生命周期：项目的清理，初始化，编译，测试，打包，集成测试，验证，部署和站点。
+
+三套生命周期：
+	clean生命周期：
+		pre-clean:执行一些清理前需要完成的工作。
+		clean：清理上一次构建生成的文件。
+		post-clean：执行一些清理后需要完成的工作。
+	default生命周期：
+		validate
+		initialize
+		generate-source
+		process-source
+		generate-resources
+		compile
+		process-classes
+		generate-test-sources
+		process-test-sources
+		generate-test-resources
+		process-test-resources
+		test-compile
+		process-test-classes
+		test
+		prepare-package
+		package
+		pre-integration-test
+		integration-test
+		post-integration-test
+		verify
+		install
+		deploy
+	site生命周期
+		pre-site
+		site
+		post-site
+		site-deploy

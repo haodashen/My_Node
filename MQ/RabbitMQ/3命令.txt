@@ -1,0 +1,65 @@
+rabbitmqctl：
+       语法：rabbitmqctl [-n node] [-t timeout] [-q] {command} [command options...]
+            [-n node]：默认节点是"rabbit@hostname"
+	    [-q]：启用quiet模式，可以屏蔽一些信息的输出，默认是不开启quiet模式的
+	    [-t timeout]：操作超时时间（单位：秒），只适用于"list_xxx"类型的命令，默认是无穷大
+
+
+     创建用户：rabbitmqctl add_user <username> <password>
+             如：创建root用户，密码为root
+	            rabbitmqctl add_user root root
+     修改密码：rabbitmqctl change_password <username> <newpassword>
+     清除密码：rabbitmqctl clear_password <username>
+     验证用户：rabbitmqctl authenticate_user <username> <password>
+     删除用户：rabbitmqctl delete_user <username>
+     查看所有用户：rabbitmqctl list_users
+     用户角色：
+               1.none：无任何角色。新创建的用户角色默认为none
+	       2.management：可以访问Web管理页面
+	       3.policymaker：包含managerment的所有权限，并且可以管理策略和参数。
+	       4.monitoring：包含management的所有权限，并且可以看到所有连接，信道及节点相关的信息
+	       5.administartor：包含monitoring的所有权限，并且可以管理用户，虚拟主机，权限，策略，参数等。administartor代表了最高的权限。
+    
+     添加角色：rabbitmqctl set_user_tags <username> <tag...>
+             如：为用户root添加最高权限
+	          rabbitmqctl set_user_tags root administartor
+
+     添加虚拟主机：rabbitmqctl add_vhost <vhost_name>
+
+     查看虚拟主机：rabbitmqctl list_vhosts [name] [tracing]
+
+
+     授权命令： rabbitmqctl set_permissions [-p vhost] {user} {conf} {write} {read}
+                 vhost : 授予用户访问权限的 vhost 名称，可以设置为默认值，即 vhoωo剖st 为 "/"
+                 user: 可以访问指定vhost 的用户名。
+		 conf: 一个用于匹配用户在哪些资源上拥有可配置权限的正则表达式。
+		 write: 一个用于匹配用户在哪些资源上拥有可写权限的正则表达式。
+		 read : 一个用于匹配用户在哪些资源上拥有可读权限的正则表达式。
+	     可配置指的是队列和交换机的创建及删除之类的操作。
+	     可写指的是发布消息。
+	     可读指与消息有关的操作，包括读取消息及清空整个队列等。
+
+	     例如：1.授予root用户可以访问虚拟主机vhost1，并在所有资源上具备可配置，可写以及可读权限
+	             rabbitmqctl set-permissions -p vhost1 root ".*" ".*" ".*"
+		   2.授予root用户可以访问虚拟主机vhost2，并在以queue开头的资源上具备可配置权限，并在所有资源上具有可写，可读的权限
+		      rabbitmqctl set_permissions -p vhost2 root "^queue.*" ".*" ".*"
+      
+      清除权限：rabbitmqctl clear_permissions [-p vhost] {username}
+               如：清除用户root的所有虚拟主机vhost1的全向
+	             rabbitmqctl clear_permissions -p vhost1 root
+
+      查看队列信息：rabbitmqctl list_queues name <queue_name>
+
+
+rabbitmq-diagnostics：
+
+rabbitmq-plugins：
+    语法：rabbitmq-plugins [--node <node>] [--timeout <timeout>] [--longnames] [--quiet] <command> [<command optoins>]                                                                                                                              command> [<command options>]
+     
+    开启插件：rabbitmq-plugins enable [plugin-name]
+    关闭插件：rabbitmq-plugins disable [plugin-name]
+    查看插件使用情况：rabbitmq-plugins list
+                 其中[E*]表示显示启动
+		     [e*]表示隐式启动
+
+rabbitmqadmin;

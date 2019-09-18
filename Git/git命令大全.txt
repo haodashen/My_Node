@@ -1,0 +1,146 @@
+﻿查看日志命令：
+	    git log filename
+	    git log --pretty=oneline：每一行显示一个提交
+	    git log --pretty=format:"%h - %an,%ar:%s" --graph：允许指定自己的输出格式。
+            格式选项		输出的格式描述
+               %H		提交对象的散列值   
+               %h               提交对象的简短散列值
+               %T               树对象的散列值
+               %t               树对象的简短散列值
+               %P               父对象的散列值
+               %p               父对象的简短散列值
+               %an              作者的名字
+               %ae              作者的电子邮箱
+               %ad              创作日期
+               %ar              相对于当前日期的创作日期
+               %cn              提交者的名字。
+	       %ce              提交者的电子邮箱
+               %cd              提交日期
+               %cr              相对于当前日期的提交日期
+               %s               提交信息的主题
+	    git log --oneline
+	    git reflog  查看提交的id
+	    git log --follow filename 继续列出出renames之外的文件的历史  Git在日志中回溯并找到内容相关联的整个历史记录
+            git log --graph --pretty=oneline --abbrev-commit
+            git log -p：显示每次提交所引入的差异（可以跟着-2，即每次显示最近两次的提交）
+            git log --stat：查看每个提交的简要统计信息。
+            git log since..util如：git log master~5..master
+
+版本后退:
+	git reset --hard 索引值  
+	git reset -hard HEAD^  #一个^后退一个
+	git reset --hard HEAD~3 #数字表名后退几步
+    一个符号^每次只能退一个
+    符号~指定后退的步数
+
+
+连接远程库：
+	  git remote add 别名 远程库地址：添加远程仓库
+	  git remote add -f alias repository
+	  git remote -v：显示Git存储的每个远程仓库对应的URL
+          git remote update:
+          git remote rm:删除给定的远程版本库以及关联的远程追踪分支
+          git branch -r -d 别名/分支名：删除一个远程跟踪分支。
+	  git remote rename oldName newName:重命名远程版本库
+          git remote set-url alias newURL：更改或更新远程版本库的URL
+	  git checkout -b branch_name [repository_alias]/[branch_name]：获取远程仓库指定分支的内容。
+	
+推送：    git push -u [repository_alias] [branch]:-u参数可以在推送的同时，将origin仓库的master分支设置为本地仓库当前分支                                                           的upstream
+          git push -u [repository_alias] [other_branch]：推送到远程仓库的其他分支上（如果远程仓库没有该分支，推送时会自                                                            动创建）。
+          
+ 
+克隆：
+    git clone+远程库地址
+更新本地库：
+	   git fetch+别名+分支名 --将远程库的最新内容抓取下来
+	   git check 别名/分支名 --查看更新的内容
+	   git merge 别名/分支名 --将远程库的分支内容合并到本地
+	   git pull 别名+分支名
+
+git rm --cached 将一个已暂存的文件转换成未暂存的,但这种方式很危险，因为你也许会忘记这个文件是不再被追踪的文件
+
+git rm file：对已经提交到版本库中的文件，会将文件从版本库和工作目录中删除
+
+git checkout HEAD --filename：恢复删除文件
+
+撤销修改：
+	 git checkout HEAD 文件名  回复指定文件的旧版本
+从暂存区撤出:
+	     git reset HEAD 文件名
+
+创建分支：git branch 分支名
+切换分支：git checkout 分支名
+创建分支,并切换到该分支：git checkout -b 分支名
+
+合并分支：git merge 分支名 
+	  git merge --no-ff 分支名:禁用Fast forward
+删除分支：git branch -d 分支名
+	  git branch -D 分支名：强制删除
+冲突：
+
+储存：git stash
+查看储存：git stash list
+回复储存：git stash apply:恢复，但是stash内容不会被删除
+	  git stash pop:恢复，但是stash内容会被删除
+
+查看远程分支：git remote -v
+
+更改提交：git rebase -i HEAD~[number]
+
+
+定义别名：git config --global alias.alias_name command
+	  如：git config --global alias.br branch
+          我们使用git branch -av查看分支时，我们可以使用git br -av代替原命令
+     我们可以从根目录查看如:cat ~/.gitconfig
+
+
+创建远程分支：git push --set-upstream origin local_branch_name:remote_branch_name
+
+本地仓库拉取远程分支：git checkout -b local_branch_name origin/remote_branch_name 或者
+		      git checkout --track origin/remote_branch_name
+                  如：拉取远程分支dev到本地：git checkout -b dev origin/dev
+                      git checkout --track origin/dev
+
+         
+
+删除远程分支：git push origin :remote_branch_name
+              git push origin --delete remote_branch_name
+
+推送标签：git push origin tag_name
+          git push origin --tags
+删除远程标签：git push origin :refs/tags/tag_name
+              git push origin --delete tag tag_name
+
+拉取指定的远程标签：git fetch origin tag tag_name
+查看指定的标签信息：git show tag_name
+
+查看远程分支的历史记录：git log origin/master
+                        git log remotes/origin/master
+	                git log refs/remotes/origin/master
+
+
+合并子模块：git submodule add sub_module_addr  sub_module_category
+           切记sub_module_category目录在工作目录中不存在，应交给git创建
+	   如： git submodule add https://github.com/haodashen/git_parent.git parent
+
+
+	  
+git hash-object file：计算和输出一个文件的sha-1值。
+git config -l ：列出完整变量名的配置文件内容
+git commit --amend：修改上一条提交信息
+
+git ls-files:可以查看隐藏在对象模型下的东西，并且可以找到那些暂存文件的Sha-1值。
+
+git cat-file -p sha-1_value : 从给定的sha-1_value散列值吧它从对象库中提取出来。
+git ls-files -s
+git ls-files --stage
+git write-tree
+
+git symbolic-ref:管理Git底层的引用
+
+git bisect：用于找出某个提交导致版本库产生倒退或bug的特殊提交，在使用该命令时，我们必须确定一个“好”提交和“坏”提交，git bisect命令系统在“好”提交和“坏”提交
+            之间选择一个新的提交并确定它“是好是坏”，并据此缩小范围。直到最后，当范围内只剩下一个提交时，就可以确定它就是引起错误的那个提交了。
+
+
+git blame:该命令会显示一个文件中的每一行最后是谁修改的和哪次提交做出了变更。
+

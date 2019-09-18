@@ -1,0 +1,1 @@
+SqlSessionFactory.openSession()是不会自动提交。

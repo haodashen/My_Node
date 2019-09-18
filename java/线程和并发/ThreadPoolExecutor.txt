@@ -1,0 +1,44 @@
+Executor框架的最核心类：ThreadPoolExecuor，它是线程池的实现类
+ 
+ 主要组件：
+ 
+ 
+ private static final RejectedExecutionHandler defaultHandler =  new AbortPolicy()：当ThreadPoolExecutor已经关闭或者ThreadPoolExecutor已经饱和时
+ （达到了最大线程池大小且工作队列已满），execute()方法将要调用的Handler。
+ 
+ 
+ 构造方法：
+   public ThreadPoolExecutor(int corePoolSize,  int maximumPoolSize,long keepAliveTime,TimeUnit unit, BlockingQueue<Runnable> workQueue,ThreadFactory threadFactory,
+                              RejectedExecutionHandler handler) 
+  {略}
+	corePoolSize:保存到线程池中的数量，即使它是空闲的，除非我们设置了allowCoreThreadTimeOut
+	maximumPoolSize：允许线程池保存最大线程数。
+	keepAliveTime:当线程池中的线程数量大于corePoolSize时，keepAliveTime为多余的空闲线程等待新任务的最长时间，超过这个时间后多余的线程将被终止。
+	unit：keepAliveTime的单位
+	workQueue：在任务执行之前用于保存任务的队列，该队列仅仅保存由execute()方法提交的Runnable任务。
+	threadFactory:在执行器创建新的线程时被使用
+	handler：由于达到线程边界和队列容量，执行被堵塞时调用 
+
+
+ private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
+
+public void execute(Runnable command)
+ {
+        if (command == null)
+            throw new NullPointerException();
+        int c = ctl.get();
+        if (workerCountOf(c) < corePoolSize) {
+            if (addWorker(command, true))
+                return;
+            c = ctl.get();
+        }
+        if (isRunning(c) && workQueue.offer(command)) {
+            int recheck = ctl.get();
+            if (! isRunning(recheck) && remove(command))
+                reject(command);
+            else if (workerCountOf(recheck) == 0)
+                addWorker(null, false);
+        }
+        else if (!addWorker(command, false))
+            reject(command);
+    }

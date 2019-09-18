@@ -1,0 +1,5 @@
+﻿生成公共秘钥：ssh-keygen -t rsa -C "yout_email@example.com"
+
+id_rsa文件是私有密钥 id_rsa.pub是公共密钥
+
+查看公共密钥：cat ~/.ssh/id_rsa.pub

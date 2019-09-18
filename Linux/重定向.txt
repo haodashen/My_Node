@@ -1,0 +1,16 @@
+﻿< filename：输入重定向
+> filename：输出重定向
+>> filename：追加输出
+2> filename：错误重定向
+2>> filenaem：追加错误重定向
+&> filename：输出重定向和错误
+>& filename：输出重定向和错误
+2>&1：通过输出对错误重定向
+1>&2：通过错误对输出重定向
+>|：输出重定向时覆盖noclobber
+<>filename：将设备文件用作标准输入和标准输出文件
+
+
+exec命令和重定向：
+	exec ls  ：shell执行ls命令时，ls命令执行完毕就退出执行命令的shell
+	exec < file：打开file读取标准输入

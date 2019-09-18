@@ -1,0 +1,27 @@
+rpm通常分为五部分：
+
+rpm查询命令：rpm -q 查询指定的包是否安装
+	     rpm -qf 查询指定文件来自于那个文件
+	     rpm -qi 查看包信息
+	     rpm -qa 查看系统已经安装的软件
+	     rpm -qc 查看包的配置文件
+	     rpm -ql 查看包生成的所有文件
+	     rpm -qp
+	     rpm -qg
+	     rpm -qd 查看包相关文档
+rpm查询未安装软件包信息：
+			rpm -qpi 查看一个软件包的用途和信息
+			rpm -qpl 查看一个软件包的所包含的文件
+			rpm -qpc 查看一个软件包的配置文件
+rpm安装命令:rpm -ivh
+rpm升级命令:rpm -Uvh
+rpm卸载命令: rpm -e --nodeps    --忽略依赖卸载
+
+rpm选项：-h 安装时以#显示安装进度
+	 --percent 以百分比的形式输出安装的进度
+	--test 测试安装
+
+
+linux通过镜像源进行下载：http://mirrors.163.com
+			 http://mirrors.sohu.com/
+			 http://mirrors.aliyun.com

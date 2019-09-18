@@ -1,0 +1,63 @@
+﻿本人的RabbitMQ是以rpm方法安装，rabbitmq的命令行工具存放在：/usr/sbin/目录下,通过ls /usr/sbin/rabbit*命令查看
+安装目录存放在：/usr/lib/rabbitmq/目录下。
+
+RabbitMQ提供了三种方式来定制化服务：
+         1.环境变量（Environment Variables），RabbitMQ服务端参数可以通过环境变量进行配置，例如：节点名称，
+	   RabbitMQ配置文件的地址，节点内部通信端口等。
+	 2.配置文件（Configuration File），可以定义RabbitMQ服务和插件配置，例如，TCP监听端口，以及其他网络相关
+	   的设置，内存限制，磁盘限制等。
+	 3.运行时参数和策略（Runtime Parameter and Policies），可以在运行时定义集群层面的服务设置。
+
+在/usr/lib/rabbitmq/bin/rabbitmq-defaults文件中定义了CONF_ENV_FILE变量指定了rabbitmq环境变量配置文件的位置。
+即/etc/rabbitmq/rabbitmq-env.conf
+CONFIG_FILE=/etc/rabbitmq/rabbitmq
+LOG_BASE=/var/log/rabbitmq
+MNESIA_BASE=/var/lig/rabbitmq/mnesia
+ENABLED_PLUGINS_FILE=/etc/rabbitmq/enabled_plugin
+GENERATED_CONFIG_DIR=/var/lib/rabbitmq/config
+ADVANCED_CONFIG_FILE=/etc/rabbitmq/advanced.config
+SCHEMA_DIR=/var/lib/rabbitmq/schema
+PLUGINS_DIR=${RABBITMQ_HOME}/plugins
+
+
+
+
+
+
+
+
+常用的RabbitMQ变量：1.RABBITMQ_NODE_IP_ADDRESS：绑定了某个特定的网略接口，默认值时空字符串，即绑定到所有
+                       网络接口上，如果要绑定两个或更多的网络接口，可以参考rabbitmq
+
+		     2.RABBITMQ_NODE_PORT：监听客户端连接的端口号，默认是5672
+
+		     3.RABBITMQ_DIST_PORT：RabbitMQ节点内部通信端口号，默认值为RABBITMQ_NODE_PORT+20000，即
+		       25672。如果设置了kernel.inet_dist_listen_min或者kernel.inect_dist_listen_max时，此环境
+		       变量将被忽略。
+
+		     4.RABBITMQ_NODENAME：RabbitMQ的节点名称，默认为rabbit@$HOSTNAME。在每个Erlang节点和机器
+                       的组合中，节点名称必须唯一
+
+		     5.RABBITMQ_CONF_ENV_FILE：RabbitMQ环境变量的配置文件（rabbitmq-env.conf）的地址，默认值为
+                        $RABBITM Q_HOMEletc/rabbitmq/rabbitmq-env.conf
+
+                     6.RABBITMQ_USER_LONGNAME：如果当前的hostname为nodel.longname. 那么默认情况下创建的节点名称为
+                       rabbit@nodel. 将此参数设置为true 时，创建的节点名称就为rabbitmq@node1.1ongname,即使用了长名称命名.默认值为空
+
+		     7.RABBITMQ_CONFIG_FILE：RabbitMQ 配置文件(rabbitmq.config) 的路径，注意没有".config"的后缀.默认值
+                       为$RABBITMQ_HOME/etc/rabbitmq/rabbitmq
+
+		     8.RABBITMQ_MNESIA_BASE：RABBITMQ_MNESIA_DIR 的父目录。除非明确设置了RABBITMQ_MNESIA_DIR目录，否则每个节点都应该配置
+		       这个环境变量.默认值为$RABBITMQ_HOME/var/lib/rabbitmq/mnesia
+
+                       注意对于RabbitMQ 的操作用户来说，需要有对当前目录可读、可写、可创建文件及子目录的权限
+		     9.RABBITMQ_MNESIA_DIR：包含RabbitMQ服务节点的数据库、数据存储及集群状态等目录，默认值为
+                       $RABBITMQ_MNESIA_BASE/$RABBITMQ_NODENAME
+
+		    10.RABBITMQ_LOG_BASE：RabbitMQ服务日志所在基础目录.默认值为$RABBITMQ_HOME/var/loglrabbitmq
+
+		    11.RABBITMQ_LOGS：RabbitMQ服务与Erlang相关的日志，默认值为 $RABBITMQ_LOG_BASEI/$RABBITMQ_NODENAME.log
+		    12.RABBITMQ_SASL_LOGS：RabbitMQ服务于Erlang 的SASL(System Application Support Libraries)相关的日志，
+                       默认值为$RABBITMQ_LOG_BASE/$RABBITM_NODENAME-sasl.log
+		    13.RABBITMQ_PLUGINS_DIR：插件所在路径，默认值为$RABBITMQ_HOME/plugins
+		注意：在rabbitmq-env.conf配置文件中的变量，都会省去前缀：RABBITMQ_

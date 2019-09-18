@@ -1,0 +1,97 @@
+
+  获取bean时,Spring 鼓励使用这个接口定义的api. 还有个Beanfactory方便使用.其他的4个接口都是不鼓励使用的.
+  提供容器中bean迭代的功能,不再需要一个个bean地查找.比如可以一次获取全部的bean(太暴力了),根据类型获取bean.在看SpringMVC时,扫描包路径下的具体实现策略
+就是使用的这种方式(那边使用的是BeanFactoryUtils封装的api).
+ 
+   如果同时实现了HierarchicalBeanFactory,返回值不会考虑父类BeanFactory,只考虑当前factory定义的类.当然也可以使用BeanFactoryUtils辅助类来查找祖先工厂中的类 
+ 这个接口中的方法只会考虑本factory定义的bean.这些方法会忽略ConfigurableBeanFactory的registerSingleton注册的单例bean(getBeanNamesOfType和getBeansOfType是
+ 例外,一样会考虑手动注册的单例).当然BeanFactory的getBean一样可以透明访问这些特殊bean.当然在典型情况下,所有的bean都是由external bean定义,
+ 所以应用不需要顾虑这些差别.
+
+
+public interface ListableBeanFactory extends BeanFactory {
+
+    /**
+     * 检查bean factory是否含有给定name的bean定义.
+     * 忽略父factory和其他factory注册的单例bean
+     */
+    boolean containsBeanDefinition(String beanName);
+
+    /**
+     * factory中定义的bean数量
+     * 一样不考虑父factory和其他factory注册的单例bean
+     * @return the number of beans defined in the factory
+     */
+    int getBeanDefinitionCount();
+
+    /**
+     * 获取工厂中定义的所有bean 的name
+     * 一样不考虑父factory和其他factory注册的单例bean
+     * @return the names of all beans defined in this factory,
+     * or an empty array if none defined
+     */
+    String[] getBeanDefinitionNames();
+
+    /**
+     * 获取给定类型的bean names(包括子类),通过bean 定义或者FactoryBean的getObjectType判断.
+     * 注意:这个方法仅检查顶级bean.它不会检查嵌套的bean.
+     * FactoryBean创建的bean会匹配为FactoryBean而不是原始类型.
+     * 一样不会考虑父factory中的bean,可以使用BeanFactoryUtils中的beanNamesForTypeIncludingAncestors.
+     * 其他方式注册的单例这边会纳入判断.
+     * 这个版本的getBeanNamesForType会匹配所有类型的bean,包括单例,原型,FactoryBean.在大多数实现中返回结果跟getBeanNamesOfType(type,true,true)一样.
+     * 返回的bean names会根据backend 配置的进行排序.
+     */
+    String[] getBeanNamesForType(Class<?> type);
+
+    /**
+     * 
+     * @param type the class or interface to match, or {@code null} for all bean names
+     * @param includeNonSingletons是否只要单例(包括BeanFactory),还是原型或其他作用域的bean一样包括
+     * @param allowEagerInit 是否初始化懒加载的单例,FactoryBean初始化的类和工厂方法初始化的类.就是说执行这个方法会执行对应的初始化.
+     * @return the names of beans (or objects created by FactoryBeans) matching
+     * the given object type (including subclasses), or an empty array if none
+     * @see FactoryBean#getObjectType
+     * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
+     */
+    String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit);
+
+    /**
+     * 
+     * @param type the class or interface to match, or {@code null} for all concrete beans
+     * @return a Map with the matching beans, containing the bean names as
+     * keys and the corresponding bean instances as values
+     * @throws BeansException if a bean could not be created
+     * @since 1.1.2
+     * @see FactoryBean#getObjectType
+     * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class)
+     */
+    <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException;
+
+    /**
+     * 
+     * @param type the class or interface to match, or {@code null} for all concrete beans
+     * @param includeNonSingletons whether to include prototype or scoped beans too
+     * or just singletons (also applies to FactoryBeans)
+     * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+     * <i>objects created by FactoryBeans</i> (or by factory methods with a
+     * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+     * eagerly initialized to determine their type: So be aware that passing in "true"
+     * for this flag will initialize FactoryBeans and "factory-bean" references.
+     * @return a Map with the matching beans, containing the bean names as
+     * keys and the corresponding bean instances as values
+     * @throws BeansException if a bean could not be created
+     * @see FactoryBean#getObjectType
+     * @see BeanFactoryUtils#beansOfTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
+     */
+    <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) throws BeansException;
+
+    /**
+     * 找到使用注解的类.
+     */
+     Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) throws BeansException;
+    /**
+     * 查找一个类上的注解,如果找不到,父类,接口使用注解也算.
+     */
+    <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType);
+
+}

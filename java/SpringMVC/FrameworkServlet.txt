@@ -1,0 +1,75 @@
+
+
+	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException
+	{
+		if (HttpMethod.PATCH.matches(request.getMethod())) {
+			processRequest(request, response);
+		}
+		else {
+			super.service(request, response);
+		}
+	}
+
+
+protected final void processRequest(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException
+ {
+		long startTime = System.currentTimeMillis();
+		Throwable failureCause = null;
+
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
+		LocaleContext localeContext = buildLocaleContext(request);
+
+		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
+		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);
+
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
+		//设置LocaleContext和RequestAttributes
+		initContextHolders(request, localeContext, requestAttributes);
+		try {
+			doService(request, response);
+		}
+		catch (ServletException ex) {
+			failureCause = ex;
+			throw ex;
+		}
+		catch (IOException ex) {
+			failureCause = ex;
+			throw ex;
+		}
+		catch (Throwable ex) {
+			failureCause = ex;
+			throw new NestedServletException("Request processing failed", ex);
+		}
+
+		finally {
+		//将原来的localeContext和RequestAttributes恢复，这是因为在Servlet外面可能还有别的操作，
+			resetContextHolders(request, previousLocaleContext, previousAttributes);
+			if (requestAttributes != null) {
+				requestAttributes.requestCompleted();
+			}
+			//发布消息，ServletRequestHandledEvent
+			publishRequestHandledEvent(request, response, startTime, failureCause);
+		}
+	}
+	该方法主要完成以下任务：1.对LocaleContext和RequestAttributes的设置及恢复
+	                                           2.处理完后发布了ServletRequestHandledEvent消息。
+											   
+	private void publishRequestHandledEvent(HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
+		if (this.publishEvents) {
+			// 无论请求是否执行成功都会发布消息
+			long processingTime = System.currentTimeMillis() - startTime;
+			int statusCode = (responseGetStatusAvailable ? response.getStatus() : -1);
+			this.webApplicationContext.publishEvent(
+					new ServletRequestHandledEvent(this,
+							request.getRequestURI(), request.getRemoteAddr(),
+							request.getMethod(), getServletConfig().getServletName(),
+							WebUtils.getSessionId(request), getUsernameForRequest(request),
+							processingTime, failureCause, statusCode));
+		}
+	}
+											   
+	
+	RequestContextHolder：持有上下文的Request的容器。
+	

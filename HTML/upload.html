@@ -1,0 +1,25 @@
+<html>
+<head>
+    <title>Title</title>
+    <script src="http://cdn.javaex.cn/javaex/pc/lib/jquery-1.7.2.min.js"></script>
+    <script>
+    window.onload=function()
+    {
+        var x=new FileReader;
+        document.forms[0].elements[0].onchange=function(){
+            x.readAsDataURL(this.files[0]);
+        };
+
+        x.onloadend=function(){
+            document.images[0].src=this.result;
+        }
+    }
+    </script>
+</head>
+<body>
+    <img src="" style="widht:200px;height:;">
+    <form>
+        <input type="file" name="image" />
+    </form>
+</body>
+</html>

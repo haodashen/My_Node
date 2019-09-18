@@ -1,0 +1,78 @@
+﻿防火墙  service iptables status
+	service iptables stop
+	service iptables restart
+
+开放端口：/etc/init.d/iptables
+
+chkconfig iptables on
+chkconfig iptables off
+
+netstat -nap
+netstat -lnp
+lsof -i:portnumber
+
+free: 以字节的方式显示内存和缓存用量。
+显示当前不使用的，空闲的内存:  free | grep Mem | awk '{print $4}'
+
+arch: 显示系统结构
+
+lastlog：浏览/var/log/lstlog文件，并显示所有用户的最后登录时间。
+
+vmstat：显示虚拟内存的统计结果。
+
+netstat：显示当前网路统计信息
+	netstat -lptu：显示当前打开的端口目录。
+
+init：所有进程的父进程，启动时决定设置在/etc/inittal文件的运行级别。
+      运行级别有7个：0号表示终止系统吧
+		     1号表示单用户模式
+		     2号表示除网络之外的多用户模式
+                     3号表示多用户模式
+                     4号一般不用
+	             5号表示Xwindow GUI模式
+		     6号进入重启模式。
+cat /etc/inittabl：查看运行级别相关说明。
+
+runlevel：显示过去和当前的运行级别
+
+shutdown -h now：终止系统
+shutdown -r now：重启系统
+reboot：重启系统
+
+service：用于开启和终止系统服务
+
+wc -l：显示文件行数。wc -c：显示文件字节数。wc -w：显示文件单词数。
+
+stat：
+atime：最后查看内容
+ctime：变更时间（属性的修改）
+mtime：最后修改时间（内容）
+
+cut：文件内容的查看，显示行中的指定部分，删除文件中指定字段。
+	cut -d分隔符 -f行数 filename
+
+	-b：仅显示行中指定直接范围的内容；
+	-c：仅显示行中指定范围的字符；
+	-d：指定字段的分隔符，默认的字段分隔符为“TAB”；
+	-f：显示指定字段的内容；
+	-n：与“-b”选项连用，不分割多字节字符；
+	--complement：补足被选择的字节、字符或字段；
+	--out-delimiter=<字段分隔符>：指定输出内容是的字段分割符；
+	--help：显示指令的帮助信息；
+diff：查看多个文本文件的差异
+	diff  --brief（-q） filename1,filename2
+	--version：显示指令的版本信息。
+touch：创建文件
+	touch -d time：修改文件的最后修改时间
+
+chkconfig：检索和更新系统服务的运行级别信息。
+
+dd：用于按指定的大小和个数的数据块来复制文件或转换文件
+	if(input file)：输入的文件名称
+	of(output file)：输出的文件名称
+	bs(base size)：设置每个“块”的大小
+	count：设置要复制“块”的个数
+
+tr：替换文本文件的字符  tr[原始字符][目标字符]
+
+df -h：检查挂接驱动器的可用空间

@@ -1,0 +1,9 @@
+1.创建我们自己的拦截器类并实现 HandlerInterceptor 接口。
+2.创建一个Java配置类继承WebMvcConfigurerAdapter，并重写 addInterceptors 方法。
+3.将对像手动添加到拦截器链中（在addInterceptors方法中添加） 
+
+springboot 2.0之后不建议继承WebMvcConfigurerAdapter
+新的实现是：实现WebMvcConfigurer并重写addInterceptors方法
+
+注意：在继承WebMvcConfigurationSupport时，在application.properties中配置的静态路径将会失效。
+解决方法：重写addResourceHandlers方法实现静态资源的映射。

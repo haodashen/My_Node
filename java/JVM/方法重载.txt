@@ -1,0 +1,74 @@
+﻿public class MyTest5 
+{
+	public void test(Grandpa arg) {
+		System.out.println("grandpg");
+	}
+	public void teste(Father arg)
+	{
+		System.out.println("father");
+	}
+	public void test(Son son) {
+		System.out.println("son");
+	}
+	public static void main(String[] args)
+	{
+		MyTest5 my = new MyTest5();
+		Grandpa g1 = new Father();
+		Grandpa g2 = new Son();
+		my.test(g1);
+		my.test(g2);
+	}
+}
+class Grandpa{}
+class Father extends Grandpa{}
+class Son extends Father{}
+
+对于上述程序运行结果：grandpa
+                      grandpa
+
+g1和g2的静态类型都是Grandpa，而实际类型（真正指向的类型）是Father类型。
+变量的静态类型是不会发生变换的，而变量的实际类型则是可以发生变换的（多态的一种体现），实际类型在运行期可以确定。
+
+
+方法的重载，对于JVM来说是一种静态的行为，就是说在JVM执行重载方法时,JVM唯一判断的依据就是方法本身接受的静态类型参数，而不是更具方法参数的实际类型来确定的。
+这种静态行为在编译器就可以确定的。
+
+查看MyTest的main方法的字节码指令：
+ 0 new #1 <code/lsh/bytecode/MyTest5>
+ 3 dup
+ 4 invokespecial #43 <code/lsh/bytecode/MyTest5.<init>>
+ 7 astore_1
+ 8 new #44 <code/lsh/bytecode/Father>
+11 dup
+12 invokespecial #46 <code/lsh/bytecode/Father.<init>>
+15 astore_2
+16 new #47 <code/lsh/bytecode/Son>
+19 dup
+20 invokespecial #49 <code/lsh/bytecode/Son.<init>>
+23 astore_3
+24 aload_1
+25 aload_2
+26 invokevirtual #50 <code/lsh/bytecode/MyTest5.test>      这里的#50对应于常量池中的第五十个常量，即(Lcode/lsh/bytecode/Grandpa)V，方法参数类型为Grandpd
+29 aload_1
+30 aload_3
+31 invokevirtual #50 <code/lsh/bytecode/MyTest5.test>      同理
+34 return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

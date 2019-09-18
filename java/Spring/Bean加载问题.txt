@@ -1,0 +1,31 @@
+1.Spring解决环形依赖方式，Spring创建Bean的原则是不等Bean创建完毕就会将创建Bean的ObjectFactory提早曝光加入到缓存中
+    一旦下一个Bean创建是需要依赖上一个Bean，则直接使用ObjectFactory
+	
+2.Spring是如何解决循环依赖的？
+	Spring容器循环依赖包括：构造器循环依赖和Setter循环依赖。
+	构造器注入构成的循环依赖，次依赖是无法解决的，只能抛出BeanCurrentlyInCreationException异常表示循环依赖。
+	
+	setter注入方式构成的循环依赖。setter注入造成的依赖是通过Spring容器提前暴露刚完成构造器注入但未能完成其他步骤的bean来完成的，
+	而且只能解决单例作用域bean循环依赖。
+	
+	prototype范围的依赖处理：对于prototype作用域的bean，Spring容器无法完成依赖注入，因为Spring容器不进行缓存protoype作用域的bean，
+	因此无法提前暴露一个创建中的bean。
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

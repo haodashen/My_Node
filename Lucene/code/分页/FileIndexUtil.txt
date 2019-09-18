@@ -1,0 +1,56 @@
+﻿package code.lsh.lucene.page;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+
+public class FileIndexUtil
+{
+	private static Directory directory = null  ;
+	
+	public static Directory getDirectory() {
+		return directory;
+	}
+
+	public static void setDirectory(Directory directory) {
+		FileIndexUtil.directory = directory;
+	}
+
+	static
+	{
+		try {
+			directory = FSDirectory.open(Paths.get("E:\\save"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void index() throws IOException
+	{
+		IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer());
+		IndexWriter writer = new IndexWriter(directory, config);
+		File file = new File("E:\\searchsource");
+		for(File f : file.listFiles())
+		{
+			Document doc = new Document();
+			TextField nameField = new TextField("filename", f.getName(),Store.YES);
+			TextField contentField = new TextField("content",FileUtils.readFileToString(f,"utf-8"),Store.NO);
+			StoredField dateField = new StoredField("date", f.lastModified());
+			StoredField sizeField = new StoredField("size", f.length());
+			doc.add(nameField);doc.add(contentField);doc.add(dateField);doc.add(sizeField);
+			writer.addDocument(doc);
+		}
+		writer.close();
+	}
+}

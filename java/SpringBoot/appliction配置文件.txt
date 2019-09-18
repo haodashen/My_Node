@@ -1,0 +1,41 @@
+server.port=port :服务器端口
+server.context-path=path :应用程序上下文
+
+spring.file.active=filename  激活的配置文件
+
+
+spring.http.encoding.charset=UTF-8
+spring.http.enabled=true
+spring.http.force=true
+
+spring.http.encoding.enable=false 设置false后，过滤器才会生效
+
+
+spring.mvc.prefix
+spring.mvc.suffix
+spring.mvc.static-path-pattern  配置静态资源路径
+
+-- 整合mybatis
+mybatis.mapper.locations=classpath:x/x/*.xml
+
+-- 整合数据源
+spring.datasource.username
+spring.datasource.password
+spring.datasource.driver-class-name
+spring.datasource.url
+
+
+spring.boot.enableautoconfiguration=on|off 是否启动自动配置
+
+context.listener.classes=AllPathListener   添加监听器
+context.initializer.classes=AllPathInitializer  
+
+banner.location=name.txt  替换springboot启动标志
+banner.charset=encoding  自定banner的编码方式
+bananer.img.location={name}.jpg|.png
+
+
+spring.resources.staticLocations=classpath:{name}  设置静态资源路径
+
+spring.aop.auto=false/true  是否启动切面
+spring.aop.proxy-target-class=false  启动JDK的动态代理

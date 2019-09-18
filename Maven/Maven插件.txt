@@ -1,0 +1,15 @@
+mavnen-resources-plugin：默认行为是将项目主资源文件复制到主代码编译输出目录中，将测试资源文件复制到测试代码编译输出目录中
+
+maven-surefire-plugin：
+
+maven-compiler-plugin：
+
+maven-jar-plugin：
+
+mybatis-generator-mavne-plugin：
+
+maven-assembly-plugin：
+
+maven-war-plugin：
+
+maven-site-plugin：

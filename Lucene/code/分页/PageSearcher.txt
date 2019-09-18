@@ -1,0 +1,147 @@
+﻿package code.lsh.lucene.page;
+
+import java.io.IOException;
+
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+
+public class PageSearcher 
+{
+	private IndexReader reader = null ;
+	
+	public IndexSearcher getSearch(Directory directory)
+	{
+		try 
+		{
+			if(reader == null)
+					reader = DirectoryReader.open(directory);
+			else
+			{
+				IndexReader newReader = DirectoryReader.openIfChanged((DirectoryReader)reader);
+				if(newReader != null)
+				{
+					reader.close();
+					reader = newReader ;
+				}
+			}
+			return new IndexSearcher(reader);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null ;
+	}
+	
+	/**
+	 * 分页查询（每次都全部查询）
+	 * @param query 查询关键字
+	 * @param pageIndex 第几页
+	 * @param pageSize 每页显示多少行数据
+	 */
+	public void searchByPage(String query , int pageIndex , int pageSize)
+	{
+		try
+		{
+			Directory directory = FileIndexUtil.getDirectory();
+			IndexSearcher search = getSearch(directory);
+			QueryParser parser = new QueryParser("content",new StandardAnalyzer());
+			Query q = parser.parse(query);
+			TopDocs topDocs = search.search(q, 5000);
+			ScoreDoc[] sds = topDocs.scoreDocs;
+			int start = (pageIndex -1)*pageSize ;
+			int end = pageIndex*pageSize ;
+			for(int i = start ; i<end ;i++)
+			{
+				Document doc = search.doc(sds[i].doc) ;
+				System.out.println("id:"+sds[i].doc+" filename:"+doc.get("filename")+"["+doc.get("path")+"]"+" date:"+
+						doc.get("date"));
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 分页查询（每次都全部查询）
+	 * @param query 查询关键字
+	 * @param pageIndex 第几页
+	 * @param pageSize 每页显示多少行数据
+	 */
+	public void searchPageByAfter(String query ,int pageIndex , int pageSize)
+	{
+		try
+		{
+			Directory directory = FileIndexUtil.getDirectory();
+			IndexSearcher search = getSearch(directory);
+			QueryParser parser = new QueryParser("content",new StandardAnalyzer());
+			Query q = parser.parse(query);
+			TopDocs topDocs = search.search(q, 5000);
+			ScoreDoc[] sds = topDocs.scoreDocs;
+			int last = (pageIndex-1)*pageSize-1 ;
+			if(last == -1)
+			{
+				//第一行
+				topDocs = search.searchAfter(null, q, pageSize);
+			}
+			else
+			{
+				topDocs = search.searchAfter(sds[last], q, pageSize);
+			}
+			ScoreDoc[] sds2 = topDocs.scoreDocs;
+			for(ScoreDoc sd :sds2)
+			{
+				Document doc = search.doc(sd.doc) ;
+				System.out.println("id:"+sd.doc+" filename:"+doc.get("filename")+"["+doc.get("path")+"]"+" date:"+
+						doc.get("date"));
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 获取上一页的最后一个ScoreDoc
+	 * @throws IOException 
+	 */
+	private ScoreDoc getLastScoreDoc(Query query ,int pageIndex , int pageSize ,IndexSearcher search) throws IOException
+	{
+		if(pageIndex ==1) return null ;
+		int num = (pageIndex-1)*pageSize ;
+		TopDocs topDocs = search.search(query, num);
+		return topDocs.scoreDocs[num-1];
+	}
+	
+	/**
+	 * 改进版的searchPageByAfter
+	 * @param query
+	 * @param pageIndex
+	 * @param pageSize
+	 */
+	public void searchPageByAfter2(String query ,int pageIndex , int pageSize)
+	{
+		try
+		{
+			Directory directory = FileIndexUtil.getDirectory();
+			IndexSearcher search = getSearch(directory);
+			QueryParser parser = new QueryParser("content",new StandardAnalyzer());
+			Query q = parser.parse(query);
+			TopDocs topDocs = search.search(q, 5000);
+			ScoreDoc lastScoreDoc = getLastScoreDoc(q, pageIndex, pageSize, search);
+			topDocs = search.searchAfter(lastScoreDoc, q, pageSize);
+			ScoreDoc[] sds2 = topDocs.scoreDocs;
+			for(ScoreDoc sd :sds2)
+			{
+				Document doc = search.doc(sd.doc) ;
+				System.out.println("id:"+sd.doc+" filename:"+doc.get("filename")+"["+doc.get("path")+"]"+" date:"+
+						doc.get("date"));
+			}
+		}
+		catch(Exception e){}
+	}
+	
+}

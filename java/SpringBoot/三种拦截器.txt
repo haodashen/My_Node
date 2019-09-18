@@ -1,0 +1,112 @@
+第一种：实现Filter接口：
+（1）将实现Filter接口，使用@Component注解将该类纳入到spring容器中，这样会对所有的url进行过滤
+（2）定义一个配之类（@Configuration），该类中的方法为一个Bean,该Bean返回FilterRegistrationBean，在方法的将实现Filter接口的类新增。
+@Configuration
+public class WebFilter extends WebMvcConfigurerAdapter
+{
+    @Bean
+    public FilterRegistrationBean addFilter()
+    {
+        FilterRegistrationBean filterBean = new FilterRegistrationBean() ;
+        filterBean.setFilter(new LoginFilter());
+        List<String> urlPattern = new ArrayList<>() ;
+        urlPattern.add("/login");
+        filterBean.setUrlPatterns(urlPattern);
+        return filterBean ;
+    }
+}
+
+缺点：1.无法获取哪一个Controller的哪一个方法进行处理。
+
+第二种：拦截器（Interceptor）
+(1)实现HanlerInterceptor接口，
+
+@Component
+public class LoginInterceptor implements HandlerInterceptor
+{
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
+    {
+        HandlerMethod handleMethod = (HandlerMethod)handler ;
+       	//获取调用该拦截器的类名
+	Stirng className  = handleMethod.getBean().getClass().getName();
+	//获取处理请求的方法名
+        String methodName = handleMethod.getMethod().getName();
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception
+    {
+       
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception
+    {
+
+    }
+}
+
+public class WebInterceptor extends WebMvcConfigurerAdapter
+{
+    @Autowired
+    private LoginInterceptor loginInterceptor ;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry)
+    {
+        registry.addInterceptor(loginInterceptor) ;
+    }
+}
+
+缺点：无法获取处理请求方法的参数值。
+
+第三种：切面编程获取方法参数
+
+@Aspect
+@Component
+public class TimeAspect
+{
+    @Around("execution(* code.lsh.web.controller.CountryController.*(..))")
+    public Object handleController(ProceedingJoinPoint pjp)
+    {
+        //获取方法参数
+        Object argus = pjp.getArgs();
+
+        Object obj = pjp.proceed() ;
+        
+        return obj;
+    }
+}
+
+
+
+执行顺序：Filter --> Interceptor --> Aspect --> Controller
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

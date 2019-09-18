@@ -1,0 +1,62 @@
+基本认证流程:
+                     SecurityContextPersistenceFilter
+                                   ↓
+                   AbstractAuthenticationProcessingFilter
+                                   ↓
+                    UsernamePasswordAuthenticationFilter
+                                   ↓
+                         AuthenticationManager
+                                   ↓
+                         AuthenticationProvider
+                                   ↓
+                          userDetailsService
+                                   ↓
+                              userDetails
+                                   ↓
+                                认证通过
+                                   ↓
+                            SecurityContext
+                                   ↓
+                          SecurityContextHolder
+                                   ↓
+                           RememberMeServices
+                                   ↓
+                      AuthenticationSuccessHandler
+SecurityContextPersistenceFilter会校验请求中session是否有SecurityContext，有放SecurityContextHolder
+中，返回时校验SecurityContextHolder中是否有securityContext，有放session，从而实现认证信息在多个请求中共
+享。
+AbstractAuthenticationProcessingFilter中会调自身attemptAuthentication抽象方法,
+UsernamePasswordAuthenticationFilter是其一个实现类。
+
+
+
+
+首先 添加一个类 SecurityConfig 继承 WebSecurityConfigurerAdapter ，重写configure方法，
+并加上@Configuration 和@EnableWebSecurity 2个注解
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception
+    {
+        http
+                .authorizeRequests() //注册FilterSecurityInterceptor
+                //对登陆页面不进行权限认证
+                .antMatchers("/login.html").permitAll()
+                .anyRequest()
+                .authenticated()
+                .and().csrf().disable()
+                .formLogin()
+                //自定义认证页面
+                .loginPage("/login.html")
+                //更改对form表单进行处理的url
+                .loginProcessingUrl("/authority/form")
+                //登录成功页面
+                .successForwardUrl("success.html")
+                //允许所有的用户可以访问loginPage页面
+                .permitAll();
+    }
+
+
+
+
+
+

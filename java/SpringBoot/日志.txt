@@ -1,0 +1,19 @@
+﻿日志级别：TRACH < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+logging.level.root=
+
+logging.file:指定日志输出路径
+
+logging.path：指定日志目录（此时的日志文件名为spring.log）
+
+logging.pattern.console:指定控制台日志输出格式
+
+logging.pattern.file：指定日志输出文件的格式
+
+logging.config=classpath:logback.xml  自定义日志文件
+
+spring.profiles.active=
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss}[%thread]%-5level   日志打印格式
+logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss}[%thread]%-5level
+
+默认情况下，SpringBoot将日志信息打印在控制台上，不会写到日志文件中。如果想编写出控制台的日志文件，需要在application.properties中配置：logging.file：设置文件，可以是相对路径，也可以是绝对路径。
+      logginf.path：设置目录，会在目录下创建spring.log文件，并写入日志内容。

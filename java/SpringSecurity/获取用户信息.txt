@@ -1,0 +1,43 @@
+1.实现UserDetailsService接口,并将实现类纳入到Spring容器中。
+
+@Component
+public class ＭyUserDetail implements UserDetailsService
+{
+    Logger logger = LoggerFactory.getLogger(ＭyUserDetail.class) ;
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
+    {
+        /**
+         * 这里需要从数据中查询用户的 用户名，密码和权限。
+         */
+        logger.info("登录名："+username);
+        return  new User(username,"lsh159", AuthorityUtils.commaSeparatedStringToAuthorityList("admin"));
+    }
+}
+
+2.密码加密，将实现PasswordEncoder接口的类纳入到Spring容器中，调用encode方法进行数据加密
+	
+（1）：配置类（或者自定义实现PasswordEncoder接口的类）
+    @Bean
+    public PasswordEncoder create()
+    {
+        return new BCryptPasswordEncoder();
+    }
+
+
+（2）这里的密码应该是加密后的密码，存储到数据库中，在登录时将登陆的密码进行加密，与数据库查询的密码进行比较。
+@Component
+public class ＭyUserDetail implements UserDetailsService
+{
+    Logger logger = LoggerFactory.getLogger(ＭyUserDetail.class) ;
+    @Autowired
+    private PasswordEncoder pe ;
+
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
+    {
+        logger.info("登录名："+username);
+        String encodePwd = pe.encode("lsh159") ;
+        logger.info("数据库密码是："+encodePwd);
+        return  new User(username,encodePwd, AuthorityUtils.commaSeparatedStringToAuthorityList("admin"));
+    }
+}
+	

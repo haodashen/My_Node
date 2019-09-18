@@ -1,0 +1,5 @@
+﻿@EnableConfigurationProperties
+	org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration
+        org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor
+
+

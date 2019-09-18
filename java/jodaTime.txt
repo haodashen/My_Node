@@ -1,0 +1,49 @@
+1.计算当前日期和明天日期
+	    DateTime today = new DateTime();
+		System.out.println(today.toString("yyyy-MM-dd HH:mm:SS"));
+		DateTime tomorrow  = today.plusDays(1);
+		System.out.println(tomorrow.toString("yyyy-MM-dd HH:mm:SS"));
+2.获取当前日期和后三个月的第一天和对后一天日期。
+		LocalDate localDate = new LocalDate();
+		System.out.println(localDate.toString());
+		LocalDate firstDay = localDate.plusMonths(3).dayOfMonth().withMaximumValue();
+		System.out.println(firstDay.toString());
+		LocalDate afterDay = localDate = localDate.plusMonths(3).dayOfMonth().withMinimumValue();
+		System.out.println(afterDay.toString());
+3.计算三年前三月份最后一天日期。
+		DateTime dt = new DateTime();
+		dt = dt.minusYears(3).monthOfYear().setCopy(3).dayOfMonth().withMaximumValue();
+		System.out.println(dt.toString("yyyy-MM-dd"));
+4.将UTC时间转换为Date类型。
+	public static Date convertUTC2Date(String utcDate)
+	{
+		try
+		{
+			DateTime dt = DateTime.parse(utcDate,DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+			return dt.toDate();
+		}
+		catch(Exception ex)
+		{
+			return null ;
+		}
+	}
+5.将Date时间转换为UTC时间
+		public static String convertDate2UTC(Date date)
+	    {
+			DateTime dt = new DateTime(date, DateTimeZone.UTC);
+			return dt.toString();
+	    }
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

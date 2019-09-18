@@ -1,0 +1,10 @@
+
+org.springframework.security.web.access.intercept.FilterSecurityInterceptor
+
+org.springframework.security.web.access.ExceptionTranslationFilter
+
+org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+
+
+UsernamePasswordAuthenticationFilter:
+	整个调用流程是，先调用其父类 AbstractAuthenticationProcessingFilter.doFilter() 方法，然后再执行         UsernamePasswordAuthenticationFilter.attemptAuthentication() 方法进行验证；

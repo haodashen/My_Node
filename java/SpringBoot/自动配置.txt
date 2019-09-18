@@ -1,0 +1,96 @@
+(1)基于条件的自动配置实现Condition接口，并使用@Conditional注解
+
+	public interface EncodingConvert
+	{
+
+	}
+
+	@SpringBootConfiguration
+	public class EncodingConvertConfig
+	{
+	    @Bean
+	    @Conditional(GbkConditional.class)
+	    public EncodingConvert gbk()
+	    {
+		return new GbkEncodingConvert();
+	    }
+
+	    @Bean
+	    @Conditional(UTF8Conditional.class)
+	    public EncodingConvert utf8()
+	    {
+		return new UTF8EncodingConvert();
+	    }
+	}
+
+	public class GbkConditional implements Condition
+	{
+	    @Override
+	    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata)
+	    {
+		String encoding = System.getProperty("file.encoding") ;
+		if(encoding!=null)
+		{
+		    if("gbk".equalsIgnoreCase(encoding))
+		    {
+			return true ;
+		    }
+		}
+		return false;
+	    }
+	}
+	public class UTF8Conditional implements Condition
+	{
+	    @Override
+	    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata)
+	    {
+		String encoding = System.getProperty("file.encoding") ;
+		if(encoding!=null)
+		{
+		    if("utf-8".equalsIgnoreCase(encoding))
+		    {
+			return true ;
+		    }
+		}
+		return false;
+	    }
+	}
+
+
+
+
+（2）@EnableConfigurationProperties：可以将配置文件的属性注入到Bean中
+
+（3）EableAsync启动异步。
+
+（4）@Import：导入一个或多个没有纳入spring容器中的类，或者配置类（配置类中的bean都会被spring容器托管）
+   @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
+   @Import(User.class)
+   public class Appliction
+   {
+    public static void main(String[] args)
+    {
+	SpringApplication app = new SpringApplication();
+	ConfigurableApplicationContext context = app.run(Appliction.class,args);
+	System.out.println(context.getBeansOfType(User.class));
+	context.close();
+    }
+   }
+	
+（5）实现ImporterSelector接口，方法返回的class会被容器纳入到spring中。
+	public class MyInportSelector implements ImportSelector
+	{
+	    @Override
+	    public String[] selectImports(AnnotationMetadata am)
+	    {
+		System.out.println(am.getAnnotationAttributes(EnableLogger.class.getName()));
+		System.out.println(am.hasAnnotatedMethods(Import.class.getName()));
+		return new String[]{"code.lsh.bean.User"};
+	    }
+	 }
+
+	
+
+（6）实现ImportBeanDefinitionRegistrar接口，注入bean
+
+(7)@EnableAutoConfiguration:从classpath中搜索METH-INF/Spring.factories文件，将文件中的org.springframework.boot.autoconfigure.EnableAutoConfiguration的key对应的value加载到spring容器中。

@@ -1,0 +1,383 @@
+﻿package code.lsh.lucene.search;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser.Operator;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.search.PrefixQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TermRangeQuery;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.BytesRef;
+
+public class SearchUtil
+{
+	private Directory directory ;
+	
+	private IndexReader reader = null ;
+	
+	private String[] ids = {"1","2","3","4","5","6"};
+	private String[] emails = {"aa@itat.org","bb@itat.org","cc@cc.org","dd@sina.org","ee@zttc.edu","ff@itat.org"};
+	private String[] contents = {
+			"welcome to visited the space,I like book",
+			"hello boy, I like pingpeng ball",
+			"my name is cc I like game",
+			"I like football",
+			"I like football and I like basketball too",
+			"I like movie and swim"
+	};
+	private String[] names = {"zhangsan","lisi","john","jetty","mike","jake"};
+	
+	private Date[] dates = null;
+	
+	private Map<String,Float> scores = new HashMap<String,Float>();
+	
+	public SearchUtil()
+	{
+		directory = new RAMDirectory() ;
+		setDates();
+		index();
+	}
+	
+	public IndexSearcher getSearch()
+	{
+		try 
+		{
+			if(reader == null)
+					reader = DirectoryReader.open(directory);
+			else
+			{
+				IndexReader newReader = DirectoryReader.openIfChanged((DirectoryReader)reader);
+				if(newReader != null)
+				{
+					reader.close();
+					reader = newReader ;
+				}
+			}
+			return new IndexSearcher(reader);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null ;
+	}
+	
+	private void setDates() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			dates = new Date[ids.length];
+			dates[0] = sdf.parse("2010-02-19");
+			dates[1] = sdf.parse("2012-01-11");
+			dates[2] = sdf.parse("2011-09-19");
+			dates[3] = sdf.parse("2010-12-22");
+			dates[4] = sdf.parse("2012-01-01");
+			dates[5] = sdf.parse("2011-05-19");
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * 建立索引
+	 */
+	public void index()
+	{
+		try 
+		{
+			IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()));
+			Document doc ;
+			for(int i = 0;i<ids.length;i++)
+			{
+				doc = new Document();
+				TextField idField = new TextField("id", ids[i],Store.YES);
+				TextField contentField = new TextField("content",contents[i],Store.NO);
+				TextField emailField = new TextField("email",emails[i],Store.YES);
+				TextField nameField = new TextField("name",names[i],Store.YES);
+				StoredField dateField = new StoredField("date",DateTools.dateToString(dates[i], DateTools.Resolution.DAY));
+				doc.add(idField);doc.add(contentField);doc.add(emailField); doc.add(nameField);
+				doc.add(dateField);
+				String ek = emails[i].substring(emails[i].lastIndexOf("@")+1);
+				if(scores.containsKey(ek))
+				{
+					emailField.setBoost(scores.get(ek));
+				}
+				else
+				{
+					emailField.setBoost(0.5f);
+				}
+				writer.addDocument(doc);
+			}
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 精确搜索
+	 * @param field 
+	 * @param key
+	 * @param num 搜索的个数
+	 */
+	public void searchByTerm(String field , String key , int num)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			Query query = new TermQuery(new Term(field ,key)) ;
+			TopDocs topDocs = search.search(query, num);
+			System.out.println("search count:"+topDocs.totalHits);
+			for(ScoreDoc sd : topDocs.scoreDocs)
+			{
+				Document doc = search.doc(sd.doc);
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content")+" score:"+sd.score);
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 指定范围搜索，无法搜索数字
+	 * @param field
+	 * @param start 开始
+	 * @param end  结束
+	 * @param num 搜索的个数
+	 */
+	public void searchByTermRange(String field , String start , String end ,int num)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			Query query = new TermRangeQuery(field, new BytesRef(start.getBytes()), new BytesRef(end.getBytes()), true, true);
+			TopDocs topDocs = search.search(query, num);
+			System.out.println("search count:"+topDocs.totalHits);
+			for(ScoreDoc sd : topDocs.scoreDocs)
+			{
+				Document doc = search.doc(sd.doc);
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content")+" score:"+sd.score);
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 范围搜索，可以搜索数字
+	 * @param field
+	 * @param start
+	 * @param end
+	 * @param num
+	 */
+	public void searchByNumberRangeQuery(String field ,int start , int end , int num)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			Query query = NumericRangeQuery.newIntRange(field, start, end, true, true);
+			TopDocs topDocs = search.search(query, num);
+			System.out.println("search count:"+topDocs.totalHits);
+			for(ScoreDoc sd : topDocs.scoreDocs)
+			{
+				Document doc = search.doc(sd.doc);
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content")+" score:"+sd.score);
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 前缀搜索
+	 * @param field
+	 * @param prefix  前缀
+	 * @param num
+	 */
+	public void searchByPrefix(String field ,String prefix ,int num)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			Query query = new PrefixQuery(new Term(field, prefix));
+			TopDocs topDocs = search.search(query, num);
+			System.out.println("search count:"+topDocs.totalHits);
+			for(ScoreDoc sd : topDocs.scoreDocs)
+			{
+				Document doc = search.doc(sd.doc);
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content")+" score:"+sd.score);
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 通配符搜索，可以使用*和？
+	 * @param field
+	 * @param value
+	 * @param num
+	 */
+	public void searchByRegExp(String field ,String value ,int num)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			Query query = new WildcardQuery(new Term(field,value));
+			TopDocs topDocs = search.search(query, num);
+			System.out.println("search count:"+topDocs.totalHits);
+			for(ScoreDoc sd : topDocs.scoreDocs)
+			{
+				Document doc = search.doc(sd.doc);
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content")+" score:"+sd.score);
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 多条件搜索
+	 * @param queries  
+	 * @param nums
+	 */
+	public void searchByManyCondation(Query[] queries ,int nums)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			BooleanQuery booleanQuery = new BooleanQuery();
+			for(Query query : queries)
+			{
+				booleanQuery.add(query, Occur.MUST);
+			}
+			TopDocs topDocs = search.search(booleanQuery, nums);
+			System.out.println("search count:"+topDocs.totalHits);
+			for(ScoreDoc sd : topDocs.scoreDocs)
+			{
+				Document doc = search.doc(sd.doc);
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content")+" score:"+sd.score);
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 * 全能检索
+	 * @param query
+	 * @param num
+	 */
+	public void searchByQueryParse(Query query , int num)
+	{
+		IndexSearcher searcher = getSearch();
+		try 
+		{
+			TopDocs topDocs = searcher.search(query, num) ;
+			System.out.println("searcher totoal:"+topDocs.totalHits);
+			for(ScoreDoc sd :topDocs.scoreDocs)
+			{
+				Document doc = searcher.doc(sd.doc);
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content")+" score:"+sd.score);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 分页查询
+	 */
+	public void searchByPage(String query , int pageIndex , int pageSize)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			QueryParser parser = new QueryParser("content",new StandardAnalyzer());
+			Query q = parser.parse(query);
+			TopDocs topDocs = search.search(q, 500);
+			ScoreDoc[] sds = topDocs.scoreDocs;
+			int start = (pageIndex -1)*pageSize ;
+			int end = pageIndex*pageSize ;
+			for(int i = start ; i<end ;i++)
+			{
+				Document doc = search.doc(sds[i].doc) ;
+				System.out.println("id:"+doc.get("id")+" name:"+doc.get("name")+"["+doc.get("email")+"]"+" date:"+
+						doc.get("date")+" content:"+doc.get("content"));
+			}
+		}
+		catch(Exception e){}
+	}
+	
+	/**
+	 *分页查询 
+	 */
+	public void searchPageByAfter(String query ,int pageIndex , int pageSize)
+	{
+		try
+		{
+			IndexSearcher search = getSearch();
+			QueryParser parser = new QueryParser("content",new StandardAnalyzer());
+			Query q = parser.parse(query);
+			TopDocs topDocs = search.search(q, 500);
+			ScoreDoc[] sds = topDocs.scoreDocs;
+			int last = (pageIndex-1)*pageSize-1 ;
+			topDocs = search.searchAfter(sds[last], q, pageSize);
+		}
+		catch(Exception e){}
+	}
+	
+	public static void main(String[] args) throws Exception
+	{
+		SearchUtil su = new SearchUtil();
+	//	su.searchByTerm("id", "1", 5);
+	//	su.searchByTermRange("id",  "1", "5", 4);
+	//	su.searchByPrefix("name", "j", 5);
+		
+		QueryParser parser = new QueryParser("content", new StandardAnalyzer());
+		Query query ;
+		//改变空格默认的操作符，
+		parser.setDefaultOperator(Operator.AND);
+		query = parser.parse("I like");
+		//开启首字母通配符匹配，默认为false
+		parser.setAllowLeadingWildcard(true);
+		query = parser.parse("*mail:@itca.org");
+		//检索name中没有like，content中有football
+		query = parser.parse("- name:like + football");
+		//匹配一个空间，注意TO必须大写
+		query = parser.parse("id:[1 TO 3]");
+		//短语匹配
+		query = parser.parse("\"I like football\"") ;
+		//匹配I和like之间有一个单词匹配
+		query = parser.parse("\"I like\"~1");
+		//模糊查询
+		query = parser.parse("name:mike~");
+		
+		su.searchByQueryParse(query, 10);
+		
+		
+	}
+}

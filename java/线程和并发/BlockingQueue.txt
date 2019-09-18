@@ -1,0 +1,364 @@
+阻塞队列（BlockingQueue）：是一个支持两个附加操作的队列。这两个附加操作支持阻塞的插入和移除方法。
+API说明：一个队列，支持在检索元素时等待队列变成非空的操作，并且在存储元素时等待队列中的空间变成可用。
+            阻塞队列不接受null元素
+			阻塞队列由容量限制，在任何给定的时间都有一个remainingCapacity，当超过次容量时，添加元素
+
+堵塞队列：1.ArrayBlockingQueue：一个由数组结构组成的有界阻塞队列
+                  2.LinkedBlockingQueue：一个由链表结构组成的有界阻塞队列
+				  3.PriorityBlockingQueue：一个支持优先级排序的无界阻塞队列
+				  4.DelayQueue：一个使用优先级队列实现的无界阻塞队列
+				  5.SynchronoutQueue：一个不存储元素的阻塞队列
+				  6.LinkedTransferQueue：一个由链表结构组成的无界阻塞队列
+				  7.LinkedBlockingDeque：一个由链表结构组成的双向阻塞队列
+				  
+
+ArrayBlockingQueue：是一个用数组是实现的有界阻塞队列，默认情况下不保证线程公平的访问队列，所谓公平队列是指阻塞的线程，可以按照
+                                  阻塞的先后顺序访问队列，即先阻塞线程先访问队列。非公平性是对先等待的线程是非公平的。当队列可用时，阻塞的线
+								  程都可以争取访问队列的资格，有可能先阻塞的线程最后访问队列。为了公平行，通常会降低吞吐量。
+								  
+LinkedBlockingQueue：是一个链表实现的有界阻塞队列。次队列的默认和最大长度为Integer.MAX_VALUE
+
+.PriorityBlockingQueue：支持优先级的无界阻塞队列。默认情况下元素采取自然顺序升序排列。也可以自定义compareTo()方法来制定元素的排序规则，或者
+                                      在初始化时指定构造参数Comparator来对元素进行排序。
+									  
+									  
+DelayQueue：是一个支持延续获取元素的无界阻塞队列，队列使用PriorityQueue来实现。队列中的元素必须实现Delayed接口，在创建时指定多久才能从队列
+                      中获取当前元素，只有在延迟期满时才能从队列中提取元素。队列的头部是延迟期满后保存时间最长的Delayed元素。如果没有过期元素，则队
+					  列的头部和poll方法将会返回null。当元素的getDelay()方法返回一个小于等于0时，将发生过期。
+					  
+					  实现Delayed接口：第一步：在对象初始化时，初始化基本数据。
+					                                第二步：实现getDelay方法，该方法返回当前元素还需要延长多长时间，单位是纳秒
+													第三步：实现comparaTo方法来指定元素的顺序。如：让延迟时间长的元素放在队列中末尾。
+													
+demo1:学生考试
+package code.lsh.queue;
+
+import java.util.Iterator;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+
+
+public class Exam 
+{
+
+    public static void main(String[] args) throws InterruptedException
+    {
+        int studentNumber = 20;
+        CountDownLatch countDownLatch = new CountDownLatch(studentNumber+1);
+        DelayQueue< Student> students = new DelayQueue<Student>();
+        Random random = new Random();
+        for (int i = 0; i < studentNumber; i++)
+        {
+            students.put(new Student("student"+(i+1), 30+random.nextInt(90),countDownLatch));
+        }
+        Thread teacherThread =new Thread(new Teacher(students)); 
+        students.put(new EndExam(students, 120,countDownLatch,teacherThread));
+        teacherThread.start();
+        countDownLatch.await();
+        System.out.println(" 考试时间到，全部交卷！");  
+    }
+
+}
+
+class Student implements Runnable,Delayed
+{
+	/**姓名*/
+    private String name;
+    /**答题总共使用的时间*/
+    private long workTime;
+    /**交卷时间*/
+    private long submitTime;
+    /**是否强制交卷*/
+    private boolean isForce = false;
+    
+    private CountDownLatch countDownLatch;
+    
+    public Student(){}
+    
+    public Student(String name,long workTime,CountDownLatch countDownLatch)
+    {
+        this.name = name;
+        this.workTime = workTime;
+        this.submitTime = TimeUnit.NANOSECONDS.convert(workTime, TimeUnit.NANOSECONDS)+System.nanoTime();
+        this.countDownLatch = countDownLatch;
+    }
+    
+    @Override
+    public int compareTo(Delayed o) 
+    {
+        if(o == null || ! (o instanceof Student))
+        	return 1;
+        if(o == this)
+        	return 0; 
+        Student s = (Student)o;
+        if (this.workTime > s.workTime) {
+            return 1;
+        }else if (this.workTime == s.workTime) {
+            return 0;
+        }else {
+            return -1;
+        }
+    }
+
+    @Override
+    public long getDelay(TimeUnit unit)
+    {
+        return unit.convert(submitTime - System.nanoTime(),  TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void run() 
+    {
+        if (isForce) 
+        {
+            System.out.println(name + " 交卷, 希望用时" + workTime + "分钟"+" ,实际用时 120分钟" );
+        }else
+        {
+            System.out.println(name + " 交卷, 希望用时" + workTime + "分钟"+" ,实际用时 "+workTime +" 分钟");  
+        }
+        countDownLatch.countDown();
+    }
+
+    public boolean isForce()
+    {
+        return isForce;
+    }
+
+    public void setForce(boolean isForce)
+    {
+        this.isForce = isForce;
+    }
+    
+}
+
+class EndExam extends Student
+{
+
+    private DelayQueue<Student> students;
+    private CountDownLatch countDownLatch;
+    private Thread teacherThread;
+    
+    public EndExam(DelayQueue<Student> students, long workTime, CountDownLatch countDownLatch,Thread teacherThread)
+    {
+        super("强制收卷", workTime,countDownLatch);
+        this.students = students;
+        this.countDownLatch = countDownLatch;
+        this.teacherThread = teacherThread;
+    }
+    
+    @Override
+    public void run() 
+    {
+        teacherThread.interrupt();
+        Student tmpStudent;
+        for (Iterator<Student> iterator2 = students.iterator(); iterator2.hasNext();) 
+        {
+            tmpStudent = iterator2.next();
+            tmpStudent.setForce(true);
+            tmpStudent.run();
+        }
+        countDownLatch.countDown();
+    }
+    
+}
+
+class Teacher implements Runnable
+{
+
+    private DelayQueue<Student> students;
+    public Teacher(DelayQueue<Student> students)
+    {
+        this.students = students;
+    }
+    @Override
+    public void run() 
+    {
+        try
+        {
+            System.out.println(" test start");
+            while(!Thread.interrupted())
+            {
+                students.take().run();
+            }
+        } 
+        catch (Exception e) 
+        {
+            e.printStackTrace();
+        }
+    }
+}
+
+demo2:缓存
+package code.lsh.queue;
+
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+
+public class Cache<K, V> 
+{
+
+    public ConcurrentHashMap<K, V> map = new ConcurrentHashMap<K, V>();
+    public DelayQueue<DelayedItem<K>> queue = new DelayQueue<DelayedItem<K>>();
+    
+    
+    public void put(K k,V v,long liveTime)
+    {
+        V v2 = map.put(k, v);
+        DelayedItem<K> tmpItem = new DelayedItem<K>(k, liveTime);
+        if (v2 != null) {
+            queue.remove(tmpItem);
+        }
+        queue.put(tmpItem);
+    }
+    
+    public Cache()
+    {
+        Thread t = new Thread(){
+            @Override
+            public void run(){
+                dameonCheckOverdueKey();
+            }
+        };
+        t.setDaemon(true);
+        t.start();
+    }
+    
+    public void dameonCheckOverdueKey()
+    {
+        while (true) {
+            DelayedItem<K> delayedItem = queue.poll();
+            if (delayedItem != null) {
+                map.remove(delayedItem.getT());
+                System.out.println(System.nanoTime()+" remove "+delayedItem.getT() +" from cache");
+            }
+            try {
+                Thread.sleep(300);
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+        }
+    }
+    
+   
+    public static void main(String[] args) throws InterruptedException 
+    {
+        Random random = new Random();
+        int cacheNumber = 10;
+        int liveTime = 0;
+        Cache<String, Integer> cache = new Cache<String, Integer>();
+        for (int i = 0; i < cacheNumber; i++) {
+            liveTime = random.nextInt(3000);
+            System.out.println(i+"  "+liveTime);
+            cache.put(i+"", i, random.nextInt(liveTime));
+            if (random.nextInt(cacheNumber) > 7) {
+                liveTime = random.nextInt(3000);
+                System.out.println(i+"  "+liveTime);
+                cache.put(i+"", i, random.nextInt(liveTime));
+            }
+        }
+        Thread.sleep(3000);
+        System.out.println();
+    }
+}
+
+class DelayedItem<T> implements Delayed
+{
+    private T t;
+    private long liveTime ;
+    private long removeTime;
+    
+    public DelayedItem(T t,long liveTime)
+    {
+        this.setT(t);
+        this.liveTime = liveTime;
+        this.removeTime = TimeUnit.NANOSECONDS.convert(liveTime, TimeUnit.NANOSECONDS) + System.nanoTime();
+    }
+    
+    @Override
+    public int compareTo(Delayed o)
+    {
+        if (o == null) return 1;
+        if (o == this) return  0;
+        if (o instanceof DelayedItem){
+            DelayedItem<T> tmpDelayedItem = (DelayedItem<T>)o;
+            if (liveTime > tmpDelayedItem.liveTime ) {
+                return 1;
+            }else if (liveTime == tmpDelayedItem.liveTime) {
+                return 0;
+            }else {
+                return -1;
+            }
+        }
+        long diff = getDelay(TimeUnit.NANOSECONDS) - o.getDelay(TimeUnit.NANOSECONDS);
+        return diff > 0 ? 1:diff == 0? 0:-1;
+    }
+
+    @Override
+    public long getDelay(TimeUnit unit) {
+        return unit.convert(removeTime - System.nanoTime(), unit);
+    }
+
+    public T getT() {
+        return t;
+    }
+
+    public void setT(T t) {
+        this.t = t;
+    }
+    @Override
+    public int hashCode(){
+        return t.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object object){
+        if (object instanceof DelayedItem) {
+            return object.hashCode() == hashCode() ?true:false;
+        }
+        return false;
+    }
+    
+}
+
+													
+SynchronoutQueue：是一个不存储元素的阻塞队列。每一个put操作必须等待一个take操作。否则不能添加任何元素。它支持公平访问队列。默认情况下线程采取
+                                非公平行策略访问队列。
+								SynchronoutQueue可以看作一个传送门，它将生产者生产的数据直接传递给消费者。队列本身不存放任何元素
+													
+
+													
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

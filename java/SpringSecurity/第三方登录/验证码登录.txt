@@ -1,0 +1,236 @@
+1.生成验证码代码：
+
+public class ValidImg
+{
+    private static int width = 90;// 定义图片的width
+    private static int height = 20;// 定义图片的height
+    private static int codeCount = 4;// 定义图片上显示验证码的个数
+    private static int xx = 15;
+    private static int fontHeight = 18;
+    private static  int codeY = 16;
+    private static char[] codeSequence = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+    public static ImgCode generateCodeAndPic()
+    {
+        BufferedImage buffImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics gd = buffImg.getGraphics();
+        Random random = new Random();
+        gd.setColor(Color.WHITE);
+        gd.fillRect(0, 0, width, height);
+
+        Font font = new Font("Fixedsys", Font.BOLD, fontHeight);
+        gd.setFont(font);
+        // 画边框。
+        gd.setColor(Color.BLACK);
+        gd.drawRect(0, 0, width - 1, height - 1);
+
+        // 随机产生40条干扰线，使图象中的认证码不易被其它程序探测到。
+        for (int i = 0; i < 30; i++)
+        {
+            int x = random.nextInt(width);
+            int y = random.nextInt(height);
+            int xl = random.nextInt(12);
+            int yl = random.nextInt(12);
+            gd.setColor(getColor());
+            gd.drawLine(x, y, x + xl, y + yl);
+        }
+
+        // randomCode用于保存随机产生的验证码
+        StringBuffer randomCode = new StringBuffer();
+
+        // 随机产生codeCount数字的验证码。
+        for (int i = 0; i < codeCount; i++)
+        {
+            String code = String.valueOf(codeSequence[random.nextInt(36)]);
+            gd.setColor(getColor());
+            gd.drawString(code, (i + 1) * 15, codeY);
+            randomCode.append(code);
+        }
+       /* Map<String,Object> map  =new HashMap<String,Object>();
+        //存放验证码
+        map.put("code", randomCode);
+        //存放生成的验证码BufferedImage对象
+        map.put("codePic", buffImg);*/
+        ImgCode imgCode = new ImgCode(buffImg,randomCode.toString(),60) ;
+        return imgCode;
+    }
+
+    private static Color getColor()
+    {
+        Random random = new Random() ;
+        int r = random.nextInt(255) ;
+        int g = random.nextInt(255) ;
+        int b = random.nextInt(255) ;
+        System.out.println("r:"+r+" b:"+b+" g:"+g);
+        return new Color(r,g,b) ;
+    }
+
+}
+
+public class ImgCode
+{
+
+    private BufferedImage bufferedImage ;
+
+    private String code ;
+    //验证码过期时间
+    private LocalDateTime expireTime ;
+
+    public ImgCode(BufferedImage bufferedImage , String code , int expireTimes)
+    {
+        this.bufferedImage = bufferedImage ;
+        this.code = code ;
+        this.expireTime = LocalDateTime.now().plusSeconds(expireTimes) ;
+    }
+
+    public ImgCode(BufferedImage bufferedImage , String code , LocalDateTime expireTime)
+    {
+        this.bufferedImage = bufferedImage ;
+        this.code = code ;
+        this.expireTime = expireTime ;
+    }
+
+    public BufferedImage getBufferedImage(){
+        return bufferedImage;
+    }
+
+    public void setBufferedImage(BufferedImage bufferedImage){
+        this.bufferedImage = bufferedImage;
+    }
+
+    public String getCode(){
+        return code;
+    }
+
+    public void setCode(String code){
+        this.code = code;
+    }
+
+    public LocalDateTime getExpireTime(){
+        return expireTime;
+    }
+
+    public void setExpireTime(LocalDateTime expireTime){
+        this.expireTime = expireTime;
+    }
+}
+
+2.Controller层调用，将生成的验证码在前台展示
+
+@RestController
+public class ValidImgCodeController
+{
+   
+    private SessionStrategy session = new HttpSessionSessionStrategy() ;
+
+    private final String SESSION_KEY = "SESSION_KEY_IMAGE_CODE" ;
+
+    @GetMapping(value="code/valid")
+    public void createCode(HttpServletRequest req , HttpServletResponse resp)
+    {
+        ImgCode imgCode = ValidImg.generateCodeAndPic();
+	//将生成的验证码添加到session中
+        session.setAttribute(new ServletWebRequest(req),SESSION_KEY,imgCode);
+        try
+        {
+            ImageIO.write(imgCode.getBufferedImage(),"jpeg",resp.getOutputStream()) ;
+        }
+        catch(IOException e){e.printStackTrace();}
+
+
+    }
+}
+注意：在将生成的验证码信息添加Session时，需要添加spring-social-core的依赖
+
+
+3.对url以/code/valid 为结尾不进行权限的认证和拦截
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception
+    {
+        http
+           .formLogin()
+            //自定义登录页面
+            .loginPage("/authority/request")
+            //更改对form表单进行处理的url
+            .loginProcessingUrl("/authority/form")
+            //配置过滤器结束，方便进行下一个过滤器的创建和结束
+            .and()
+            .authorizeRequests() //注册FilterSecurityInterceptor
+            //对一些请求不进行权限认证
+            .antMatchers("/authority/request",securityProperties.getBrowser().getLoginPage(),"/code/valid")
+            .permitAll()
+            .anyRequest()
+            .authenticated()
+            .and().csrf().disable();
+    }
+4.添加过滤器，在自定义的过滤器中对用户的输入的验证码进行校验，并且自定义的过滤器需在UsernamePassworkPersistenceFilter之前执行
+  （1）自定义过滤器需要继承OncePerRequestFilter(org.springframework.web.filter.OncePerRequestFilter)，重写doFilter方法
+public class ValidCodeFilter extends OncePerRequestFilter
+{
+    private AuthenticationFailureHandler afh ;
+    private SessionStrategy session = new HttpSessionSessionStrategy() ;
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException
+    {
+        //获取请求路径
+        String reqUrl = request.getRequestURI().toLowerCase() ;
+        //获取请求方法
+        String reqMethod = request.getMethod().toLowerCase() ;
+        //判断请求是否为登录表单提交
+        if("/authority/form".equals(reqUrl) && "post".equals(reqMethod))
+        {
+            //对提交的验证码进行验证
+            try
+            {
+                validCode(new ServletWebRequest(request));
+            }
+            catch(ValidCodeFilterException e)
+            {
+                afh.onAuthenticationFailure(request,response,e);
+		return "" ;
+            }
+        }
+        else
+            filterChain.doFilter(request,response);
+    }
+   //验证码验证
+    private boolean validCode(ServletWebRequest request)
+    {
+        return true ;
+    }
+}
+
+  （2）自定义验证码异常处理，继承AuthenticationException
+
+	import org.springframework.security.core.AuthenticationException;
+	public class ValidCodeFilterException extends AuthenticationException
+	{
+    	   public ValidCodeFilterException(String msg)
+          {
+        	super(msg);
+           }
+	}
+（3）添加拦截器，自定义的过滤器需在UsernamePassworkPersistenceFilter之前执行
+    @Override
+    protected void configure(HttpSecurity http) throws Exception
+    {
+        http
+            //将自定义的过滤器添加到UsernamePasswordAuthenticationFilter之前
+            .addFilterBefore(validCodeFilter, UsernamePasswordAuthenticationFilter.class)
+           .formLogin()
+            //自定义登录页面
+            .loginPage("/authority/request")
+            //更改对form表单进行处理的url
+            .loginProcessingUrl("/authority/form")
+            //配置过滤器结束，方便进行下一个过滤器的创建和结束
+            .and()
+            .authorizeRequests() //注册FilterSecurityInterceptor
+            //对一些请求不进行权限认证
+            .antMatchers("/authority/request",securityProperties.getBrowser().getLoginPage(),"/code/valid")
+            .permitAll()
+            .anyRequest()
+            .authenticated()
+            .and().csrf().disable();
+    }

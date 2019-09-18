@@ -1,0 +1,25 @@
+		<dependency>
+			<groupId>org.springframework.social</groupId>
+			<artifactId>spring-social-config</artifactId>
+			<version>1.1.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.social</groupId>
+			<artifactId>spring-social-core</artifactId>
+			<version>1.1.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.social</groupId>
+			<artifactId>spring-social-security</artifactId>
+			<version>1.1.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.social</groupId>
+			<artifactId>spring-social-web</artifactId>
+		</dependency>
+
+spring-social-config:提供Java 配置
+spring-social-core:提供社交连接框架和OAuth 客户端支持
+spring-social-security:社交安全的一些支持
+spring-social-web:管理web应用程序的连接
+

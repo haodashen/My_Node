@@ -1,0 +1,5 @@
+ALT+ESC：切换
+ALT+TAB：切换
+ALT+F4：关闭
+ALT+Enter：属性
+ALT+空格键：窗口菜单

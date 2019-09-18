@@ -1,0 +1,96 @@
+-XX:+TraceClassLoading：追踪所有被加载的类。
+-XX:TraceClassUnloading：追踪被卸载的类
+
+加载
+连接 
+     --验证：确保被加载的类的正确性
+     --准备：为类的静态变量分配内存，并将其初始化为默认值
+     --解析：被类中的符号引用转换为直接饮用
+初始化：为类的静态变量赋予正确的初始值
+
+
+
+
+
+
+-XX:+<option>：开始option选项
+-XX:-<option>：关闭option选项
+-XX:<option>=<value>：为option选项赋予value值。
+
+对于final变量，在编译期间这个常量就被存入到调用这个常量这个方法所在类的常量池中了。
+
+助记符：
+        ldc：将int，float或者String类型的常量值从常量池中推送至栈顶。
+        bipush：表示将单字节(-128-127)的常量值推送到栈顶
+
+        sipush：表示将一个短整型的常量值推送到栈顶
+        iconst_1：将int类型1推送到栈顶
+        iconst_2,iconst_3,icontst_4,iconst_5
+        anewarray：表示创建一个引用类型（如类，接口，数组）数组，并将其引用值压入栈顶
+        newarray：表示创建一个指定的原始类型（如int，float，char等）的数组，并将其引用值压入栈顶。
+
+数组类型：对于数组实例来讲，其类型是由JVM在运行期动态生成的，对于一维数组：如 MyArray myArray = nww MyArray[1],该类型为[code.lsh.jvm.classload.MyArray，对于二维
+          数组：如MyArray myArray = nww MyArray[1][1],该类型为[[code.lsh.jvm.classloader.MyArray。这种形式，动态生成的类型，器
+          其父类都是Object。对于数组来说，JavaDoc经常将构成数组的元素为Component，实际上就是将数组降低一个维度后的类型
+
+原生类型数组：int nums =  new int[1]，类型为[I,父类Object 
+
+在一个接口在初始化时，并不要求父接口进行初始化。接口中的成员变量都是public static final
+只有在真正使用到父接口的时候（如引用接口中所定义的常量时），才会初始化。
+
+在初始化一个类时，并不会先初始化它所实现的接口。
+
+如果一个接口定义的变量在编译器已经确定好了，则在加载时不会自动加载父接口。
+如果一个接口定义的变量在编译器无法无法确定变量值，则在加载时会自动加载该接口和父接口。
+
+BootstrapClassLoader   ---> Load JRE\lib/rt.jar或者-xbootclasspath选项指定的jar包  System.out.println("sun.boot.class.path");
+ExtensionClassLoader ---> Load JRE\lib\ext\*.jar或者-Djava.ext.dirs指定目录下的jar包System.out.println("java.ext.dirs");
+App ClassLoader --->Load ClassPATH或者-Djava.class.path所指定目录下的类和jar包 System.out.println(System.getProperty("java.class.path"));
+
+
+
+每一个类加载器都有自己的命名空间，命名空间由该加载器及所有父加载器所加载的类组成
+在不同的命名空间中，有可能会出现类的完成名字（包括类的包名）相同的两个类
+ 
+子加载器能够访问父加载器加载的类，而父加载器不能访问子加载器加载的类
+
+
+同一个命名空间内的类是相互可见的，子加载器的命名空间包含父加载器的命名空间，因此有子加载器加载的类能看见父加载器加载的类
+如：系统类加载器可以看见根类加载器
+由父加载器加载的类不能看见子加载器加载的类。
+如果两个加载器之间没有直接或间接的父子关系，那么它们各自加载的类相互不可见。
+
+类加载器的双亲委托模型的好处：1.可以确保Java核心库的类型安全：所有的Java类都会直接或间接继承了Object类，也就是说，在运行器java.lang.Object这个类会被加载到Java虚拟机中，如果这个加载过程是 由Java应用程序自己的加载器完成的，那么很可能就会在JVM中有多个版本的java.lang.Object类，而且这些类之间还是不兼容的，相互之间不可见（正是命名空间发挥着作用）
+借助于双亲委托机制，Java核心类库中的类的加载工作由启动类加载器进行加载，从而保证了Java应用程序所使用的都是同一个版本的Java核心类库，他们之间是相互兼容的。
+2.可以确保Java核心库所提供的类不会被自定的类所代替。
+3.不同的类加载器可以为相同名称（binary name）的类创建额外的命名空间。相同名称的类可以并存在JVM中，只需要不同的类加载器进行加载即
+可。不同类加载器所加载的类之间是不兼容的，这就相当于在Java虚拟机中内部创建一个有一个相互隔离的java类空间，这类技术在很多的矿建中都得到了实际应用。
+
+注意：在我们使用java -Djava.ext.dirs=<path>之间扩展类加载器加载路径时，指定路径下的class文件必须打成jar包的形式
+
+
+内建于JVM中的启动类加载器会加载java.lang.ClassLoader以及其他的Java平台类，当JVM启动时，一块特殊的机器码会运行，它会加载扩展类加载器和系统类加载器，这块特殊的机器码叫做启动类加载器（Bootstrap）。
+启动类加载器并不是Java类，而其他的加载器则是都是Java类，启动类加载器是特定于平台的机器指令，它负责开启真个加载过程
+所有类加载器（除了启动类加载器）都被实现为Java类，不过，总归要有一个组件来加载第一个java类加载器，从而让整个加载过程能够顺利进行下去，加载第一个纯java类加载器就是启动类加载器的职责
+启动类加载器还负责加载供JRE正常运行所需要的基本组件，这包括java.util和java.lang包中的类等。
+
+
+
+
+有些符号引用是在类加载阶段或是第一次使用时就会转换为直接引用，这种转换叫做静态解析；另外一些符号引用则是在每次运行期转换为直接
+引用，这种转换叫做动态链接，这体现了Java的多态性。
+
+
+
+1.invokeinterface：调用接口中的方法，实际上是在运行期决定的，决定到底调用实现接口的哪个对象的特定方法。
+2.invokestatic：调用静态方法。
+3.invokespecial：调用自己的私有方法，构造方法（<init>）以及父类方法
+4.invokevirtual：调用虚方法，运行期动态查找的过程
+5.invokedynamic：动态调用方法。
+
+静态方法，父类方法，构造方法，私有方法都被称为非虚方法，它们是在类加载阶段就可以将符号引用转换为直接引用的。
+
+
+
+
+

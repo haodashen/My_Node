@@ -1,0 +1,16 @@
+修改root密码：https://baijiahao.baidu.com/s?id=1614000108255096283&wfr=spider&for=pc
+
+配置静态IP: vim /etc/sysconfig/network-scripts/ifcfg-*
+            vim /etc/resolv.conf：文件中增加 nameserver 8.8.8.8
+
+修改主机名配置文件：vim /etc/hosts
+
+/usr/share/applications     https://blog.csdn.net/fzh90/article/details/46795683
+
+汉字：第一步：编辑/etc/locale.conf   
+                  LANG="zh_CN.UTF-8"
+      第二步：编辑/etc/sysconfig/i18n
+                  LANG="zh_CN.UTF-8"
+                  LC_ALL="zh_CN.UTF-8"
+      第三步：编辑/etc/profile
+                  export LANG="zh_CN.UTF-8"

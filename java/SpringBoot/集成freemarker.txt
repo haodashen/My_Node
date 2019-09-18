@@ -1,0 +1,2 @@
+1.在pom.xml添加依赖
+2.freemarker默认放在classpath:templates下，详解见org.springframework.boot.autoconfigure.freemarker.FreeMarkerProperties

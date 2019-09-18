@@ -1,0 +1,232 @@
+﻿public ClassPathXmlApplicationContext(String[] paths, Class<?> clazz, ApplicationContext parent) throws BeansException {
+
+		super(parent);
+		Assert.notNull(paths, "Path array must not be null");
+		Assert.notNull(clazz, "Class argument must not be null");
+		this.configResources = new Resource[paths.length];
+		for (int i = 0; i < paths.length; i++) {
+			this.configResources[i] = new ClassPathResource(paths[i], clazz);
+		}
+		refresh();
+	}
+	
+	//AbstractApplicationContext中的方法
+	public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			// 准备刷新的上下文环境
+			prepareRefresh();
+			// 初始化BeanFactory，并进行XML文件读取
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+			// 对BeanFactory进行各种功能填充
+			prepareBeanFactory(beanFactory);
+
+			try {
+				// 子类覆盖方法做额外的处理
+				postProcessBeanFactory(beanFactory);
+
+				// 激活各种BeanFactory处理器
+				invokeBeanFactoryPostProcessors(beanFactory);
+
+				// 注册拦截Bean创建的Bean处理器，这里只是注册，真正的调用是在getBean时候
+				registerBeanPostProcessors(beanFactory);
+
+				// 为上下文初始化Message源，即不同语言的消息体，国际化锤
+				initMessageSource();
+
+				// 初始化应用消息广播器，并放入applicationEventMulticaster的bean中
+				initApplicationEventMulticaster();
+
+				// Initialize other special beans in specific context subclasses.
+				onRefresh();
+
+				// Check for listener beans and register them.
+				registerListeners();
+
+				// Instantiate all remaining (non-lazy-init) singletons.
+				finishBeanFactoryInitialization(beanFactory);
+
+				// Last step: publish corresponding event.
+				finishRefresh();
+			}
+
+			catch (BeansException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Exception encountered during context initialization - " +
+							"cancelling refresh attempt: " + ex);
+				}
+
+				// Destroy already created singletons to avoid dangling resources.
+				destroyBeans();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
+				throw ex;
+			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+			}
+		}
+	}
+	
+	
+	
+	
+	protected void prepareRefresh()
+	{
+		this.startupDate = System.currentTimeMillis();
+		this.closed.set(false);
+		this.active.set(true);
+		// 留给子类进行实现
+		initPropertySources();
+
+		//验证需要的属性文件是否都存在环境中
+		getEnvironment().validateRequiredProperties();
+
+		// Allow for the collection of early ApplicationEvents,
+		// to be published once the multicaster is available...
+		this.earlyApplicationEvents = new LinkedHashSet<ApplicationEvent>();
+	}
+	
+	
+	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		refreshBeanFactory();
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory);
+		}
+		return beanFactory;
+	}
+	
+	//AbstractRefreshableApplicationContext
+	
+	protected final void refreshBeanFactory() throws BeansException {
+	    //判断是否已经创建了BeanFactory工厂
+		if (hasBeanFactory()) {
+			destroyBeans();
+			closeBeanFactory();
+		}
+		try {
+		   //创建DefaultListableBeanFactory
+			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			//为了序列化指定id，如果需要的话，让这个BeanFactory从id反序列化到BeanFactory对象
+			beanFactory.setSerializationId(getId());
+			//定制beanFactory，设置相关属性，包括是否允许覆盖同名称的不同定义的对象以及循环依赖以及
+			customizeBeanFactory(beanFactory);
+			//初始化XmlBeanDefinitionReader用于解析xml文件
+			loadBeanDefinitions(beanFactory);
+			synchronized (this.beanFactoryMonitor) {
+				this.beanFactory = beanFactory;
+			}
+		}
+		catch (IOException ex) {
+			throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
+		}
+	}
+	
+	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		if (this.allowBeanDefinitionOverriding != null) {
+			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
+		}
+		if (this.allowCircularReferences != null) {
+			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
+		}
+	}
+	
+	
+	@Autowired和@Qualifier注解解析器QualifierAnnotationAutowireCandidateResolver
+	
+	//AbstractXmlApplicationContext
+	
+	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
+		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
+		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+
+		// Configure the bean definition reader with this context's
+		// resource loading environment.
+		beanDefinitionReader.setEnvironment(this.getEnvironment());
+		beanDefinitionReader.setResourceLoader(this);
+		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
+
+		
+		initBeanDefinitionReader(beanDefinitionReader);
+		
+		loadBeanDefinitions(beanDefinitionReader);
+	}
+	//解析配置文件
+	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException
+	{
+		Resource[] configResources = getConfigResources();
+		if (configResources != null) {
+			reader.loadBeanDefinitions(configResources);
+		}
+		String[] configLocations = getConfigLocations();
+		if (configLocations != null) {
+			reader.loadBeanDefinitions(configLocations);
+		}
+	}
+	
+	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) 
+	{
+		//设置classLoader为当前context的classLoader
+		beanFactory.setBeanClassLoader(getClassLoader());
+		//设置beanFactory的表达式语言处理器
+		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+		//添加属性编辑器
+		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
+
+		// 依赖注入忽略的接口
+		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
+
+		//设置了几个自动装配特殊原则
+		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
+		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
+		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
+		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
+
+		// Detect a LoadTimeWeaver and prepare for weaving, if found.
+		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
+			// Set a temporary ClassLoader for type matching.
+			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+		}
+
+		// Register default environment beans.
+		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
+			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
+		}
+		if (!beanFactory.containsLocalBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
+			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
+		}
+		if (!beanFactory.containsLocalBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
+			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

@@ -1,0 +1,2 @@
+1.在/src/main/webapp下，可以直接访问
+	org.springframework.boot.autoconfigure.web.ResourceProperties默认路径有：

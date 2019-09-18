@@ -1,0 +1,21 @@
+第一种：使用Runnable异步处理REST服务
+Logger logger = LoggerFactory.getLogger(AsyController.class) ;
+    @GetMapping(value="order")
+    public String order()
+    {
+        logger.info("主线程开始");
+        Callable callable = new Callable()
+        {
+            public String call() throws Exception
+            {
+                System.out.println();
+                logger.info("副线程开始");
+                Thread.sleep(1000);
+                logger.info("副线程结束");
+                return "success";
+            }
+        } ;
+        logger.info("主线程结束");
+        return "result" ;
+    }
+第二种：使用DeferredResult异步处理REST服务

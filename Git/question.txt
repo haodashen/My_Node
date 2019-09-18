@@ -1,0 +1,22 @@
+1.我在码云上创建了一个项目并添加了README.md文件，随后在本地IDEA中创建项目并git init初始化，
+  添加远程连接git rmmote add origin remote_url后进行如下操作：
+  第一步：git fetch orign master
+  第二步：添加了.gitignore文件
+  第三步：将修改添加到版本库中
+  第四步：将修改推送到远程git push --set-upstream origin master 出现如下错误，推送失败
+  To https://gitee.com/haodashen/cmd.git
+  ! [rejected]        master -> master (non-fast-forward)
+  error: failed to push some refs to 'https://gitee.com/haodashen/cmd.git'
+  hint: Updates were rejected because the tip of your current branch is behind
+  hint: its remote counterpart. Integrate the remote changes (e.g.
+  hint: 'git pull ...') before pushing again.
+  第五步：随后使用git pull origin master命令进行拉去远程仓库，显示如下错误信息。
+  From https://gitee.com/haodashen/cmd
+  * branch            master     -> FETCH_HEAD
+  fatal: refusing to merge unrelated histories
+  原因：
+
+  第六步：使用git pull origin master --allow-unrelated-histories成功进行了拉去
+  第七步：git log 查看历史记录，发现git为我们进行了一次合并操作。
+
+

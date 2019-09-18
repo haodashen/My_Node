@@ -1,0 +1,9 @@
+错误页面处理：
+
+1.实现ErrorPageRegistrar接口，并纳入到spirng容器中
+2.重写接口方法，并以ErrorPage为参数。
+
+
+Controller异常处理：
+	1.使用@ExceptionHandler注解处理特定的异常
+	2.定义异常处理类，并在类上使用@ControllerAdvice注解，在该类中定义的异常处理方法使用@ExceptionHandler注解处理特定的异常。

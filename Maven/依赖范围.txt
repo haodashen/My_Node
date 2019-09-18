@@ -1,0 +1,8 @@
+compile：编译依赖范围，如果没有指定，就会默认使用该依赖范围。使用此依赖分为的Maven依赖，对于编译，测试，运行三种         	classpath都有效
+test：测试依赖范围。使用此依赖范围的Maven，只对于测试classpath有效
+provided：已提供依赖范围，对于编译和测试classpath有效，但在编译主代码无效。
+system：系统依赖范围，和provided依赖范围一致，但是必须通过systemPath元素显示地指定依赖文件的路径。
+import：导入依赖范围。
+runtime：运行时依赖范围，对于测试和运行classpath有效，但在编译主代码无效。
+
+传递性依赖
