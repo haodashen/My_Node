@@ -1,0 +1,4 @@
+<input type="text" id="s_codeOrName" size="30" onkeydown="if(event.keyCode==13) searchGoods()"/>
+点击键盘Enter键，调用searchGoods方法。
+
+<input class="easyui-textbox" style="width:200px;"/>

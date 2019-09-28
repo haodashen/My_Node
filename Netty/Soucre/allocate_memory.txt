@@ -1,0 +1,228 @@
+
+分析Netty自适应缓冲区分配策略和对外内存分配：
+
+AbstractBootstrap.java:
+
+private ChannelFuture doBind(final SocketAddress localAddress) {
+	final ChannelFuture regFuture = initAndRegister();
+	final Channel channel = regFuture.channel();
+	if (regFuture.cause() != null) {
+		return regFuture;
+}
+
+final ChannelFuture initAndRegister() {
+	Channel channel = null;
+	try {
+	    //这里实例化了NioServerSocketChannel
+		channel = channelFactory.newChannel();
+		init(channel);
+	} catch (Throwable t) {
+		if (channel != null) {
+			channel.unsafe().closeForcibly();
+		}
+		return new DefaultChannelPromise(channel, GlobalEventExecutor.INSTANCE).setFailure(t);
+	}
+	ChannelFuture regFuture = config().group().register(channel);
+	if (regFuture.cause() != null) {
+		if (channel.isRegistered()) {
+			channel.close();
+		} else {
+			channel.unsafe().closeForcibly();
+		}
+	}
+	return regFuture;
+}
+
+--------------------------------------------------------------------
+NioServerSocketChannel.java:
+
+public NioServerSocketChannel() {
+        this(newSocket(DEFAULT_SELECTOR_PROVIDER));
+}
+
+public NioServerSocketChannel(ServerSocketChannel channel) {
+	super(null, channel, SelectionKey.OP_ACCEPT);
+	config = new NioServerSocketChannelConfig(this, javaChannel().socket());
+}
+ 
+ NioServerSocketChannelConfig.java:
+ 
+private NioServerSocketChannelConfig(NioServerSocketChannel channel, ServerSocket javaSocket) {
+		super(channel, javaSocket);
+}
+
+public DefaultServerSocketChannelConfig(ServerSocketChannel channel, ServerSocket javaSocket) {
+	super(channel);
+	if (javaSocket == null) {
+		throw new NullPointerException("javaSocket");
+	}
+	this.javaSocket = javaSocket;
+}
+
+DefaultChannelConfig.java:
+
+public DefaultChannelConfig(Channel channel) {
+      this(channel, new AdaptiveRecvByteBufAllocator());
+}
+
+AdaptiveRecvByteBufAllocator.java:
+
+public AdaptiveRecvByteBufAllocator() {
+	this(DEFAULT_MINIMUM, DEFAULT_INITIAL, DEFAULT_MAXIMUM);
+}
+该类就是分配ByteBuffer大小的主要类：AdaptiveRecvByteBufAllocator，该类有一个内部类HandlerImpl
+private final class HandleImpl extends MaxMessageHandle {
+	private final int minIndex;
+	private final int maxIndex;
+	private int index;
+	private int nextReceiveBufferSize;
+	private boolean decreaseNow;
+
+	public HandleImpl(int minIndex, int maxIndex, int initial) {
+		this.minIndex = minIndex;
+		this.maxIndex = maxIndex;
+
+		index = getSizeTableIndex(initial);
+		nextReceiveBufferSize = SIZE_TABLE[index];
+	}
+	@Override
+	public int guess() {
+		return nextReceiveBufferSize;
+	}
+	private void record(int actualReadBytes) {
+		if (actualReadBytes <= SIZE_TABLE[Math.max(0, index - INDEX_DECREMENT - 1)]) {
+			if (decreaseNow) {
+				index = Math.max(index - INDEX_DECREMENT, minIndex);
+				nextReceiveBufferSize = SIZE_TABLE[index];
+				decreaseNow = false;
+			} else {
+				decreaseNow = true;
+			}
+		} else if (actualReadBytes >= nextReceiveBufferSize) {
+			index = Math.min(index + INDEX_INCREMENT, maxIndex);
+			nextReceiveBufferSize = SIZE_TABLE[index];
+			decreaseNow = false;
+		}
+	}
+	@Override
+	public void readComplete() {
+		record(totalBytesRead());
+	}
+}
+
+MaxMessageHandle.java:该类中allocate方法
+@Override
+public ByteBuf allocate(ByteBufAllocator alloc) {
+	return alloc.ioBuffer(guess());
+}
+
+ByteBufAllocator.java:实现类AbstractByteBufAllocator实现方法，ioBuffer方法
+@Override
+public ByteBuf ioBuffer(int initialCapacity) {
+	if (PlatformDependent.hasUnsafe()) {
+		return directBuffer(initialCapacity);
+	}
+	return heapBuffer(initialCapacity);
+}
+
+@Override
+public ByteBuf directBuffer(int initialCapacity) {
+	return directBuffer(initialCapacity, DEFAULT_MAX_CAPACITY);
+}
+
+@Override
+public ByteBuf directBuffer(int initialCapacity, int maxCapacity) {
+	if (initialCapacity == 0 && maxCapacity == 0) {
+		return emptyBuf;
+	}
+	validate(initialCapacity, maxCapacity);
+	return newDirectBuffer(initialCapacity, maxCapacity);
+}
+
+protected abstract ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity);
+
+
+实现类：UnpooledByteBufAllocator.java
+@Override
+protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
+	final ByteBuf buf;
+	if (PlatformDependent.hasUnsafe()) {
+		buf = PlatformDependent.useDirectBufferNoCleaner() ?
+				new InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf(this, initialCapacity, maxCapacity) :
+				new InstrumentedUnpooledUnsafeDirectByteBuf(this, initialCapacity, maxCapacity);
+	} else {
+		buf = new InstrumentedUnpooledDirectByteBuf(this, initialCapacity, maxCapacity);
+	}
+	return disableLeakDetector ? buf : toLeakAwareBuffer(buf);
+}
+
+InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf(
+		UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
+	super(alloc, initialCapacity, maxCapacity);
+}
+
+InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf的父类UnpooledUnsafeNoCleanerDirectByteBuf：
+
+UnpooledUnsafeNoCleanerDirectByteBuf(ByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
+	super(alloc, initialCapacity, maxCapacity);
+}
+
+protected UnpooledUnsafeDirectByteBuf(ByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
+	super(maxCapacity);
+	if (alloc == null) {
+		throw new NullPointerException("alloc");
+	}
+	if (initialCapacity < 0) {
+		throw new IllegalArgumentException("initialCapacity: " + initialCapacity);
+	}
+	if (maxCapacity < 0) {
+		throw new IllegalArgumentException("maxCapacity: " + maxCapacity);
+	}
+	if (initialCapacity > maxCapacity) {
+		throw new IllegalArgumentException(String.format(
+				"initialCapacity(%d) > maxCapacity(%d)", initialCapacity, maxCapacity));
+	}
+
+	this.alloc = alloc;
+	//直接分配内存
+	setByteBuffer(allocateDirect(initialCapacity), false);
+}
+
+protected ByteBuffer allocateDirect(int initialCapacity) {
+	return ByteBuffer.allocateDirect(initialCapacity);
+}
+
+final void setByteBuffer(ByteBuffer buffer, boolean tryFree) {
+	if (tryFree) {
+		ByteBuffer oldBuffer = this.buffer;
+		if (oldBuffer != null) {
+			if (doNotFree) {
+				doNotFree = false;
+			} else {
+				freeDirect(oldBuffer);
+			}
+		}
+	}
+	this.buffer = buffer;
+	memoryAddress = PlatformDependent.directBufferAddress(buffer);
+	tmpNioBuf = null;
+	capacity = buffer.remaining();
+}
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

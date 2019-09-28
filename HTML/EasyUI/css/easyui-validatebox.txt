@@ -1,0 +1,2 @@
+应付金额：<input type="text" id="amountPayable" 
+	name="amountPayable" size="10" readonly="readonly" class="easyui-validatebox" required="true"/>

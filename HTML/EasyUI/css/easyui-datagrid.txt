@@ -1,0 +1,190 @@
+-----------------------------------CSS加载---------------------------------------------------------------------
+<table id="dg3" title="商品信息" class="easyui-datagrid"
+   fitColumns="true" pagination="true" rownumbers="true" singleSelect="true"
+   url="/jude/admin/goods/list" fit="true" toolbar="#tb3">
+   <thead>
+	<tr>
+		<th field="id" width="30" hidden=true align="center">编号</th>
+		<th field="code" width="50" align="center">商品编码</th>
+		<th field="name" width="150" align="left">商品名称</th>
+		<th field="model" width="50" align="center">型号</th>
+		<th field="unit" width="50" align="center" >单位</th>
+		<th field="lastPurchasingPrice" width="50" align="center" formatter="formatLastPurchasingPrice">上次进价</th>
+		<th field="purchasingPrice" width="50" align="center" formatter="formatPurchasingPrice">成本均价</th>
+		<th field="inventoryQuantity" width="50" align="center">库存数量</th>
+	</tr>
+   </thead>
+ </table>
+-----------------------------------js加载---------------------------------------------------------------------
+<table id="bg"></table>
+<script>
+	$(function(){
+		$("#bg").datagrid({
+			//width:1000,
+			title:"商品信息",
+			//url:'http://www.localhost:8080/jude/admin/goods/list',
+			columns:[[
+				{"field":"id","title":"编号","width":"30"},
+				{"field":"code","title":"商品编号","width":"50"},
+				{"field":"name","title":"商品名称","width":"150"},
+				{"field":"model","title":"型号","width":"50"},
+				{"field":"unit","title":"单位","width":"50"},
+				{"field":"lastPurchasingPrice","title":"上次进价","width":"50"},
+				{"field":"purchasingPrice","title":"成本均价","width":"50"},
+				{"field":"inventoryQuantity","title":"库存数量","width":"50"}
+			]],
+			pagination:'true',
+			pageSize:5,
+			pageList:[5,10,15,20],
+			pageNumber:2,
+			pagePosition:'top'
+		});
+	});
+</script>
+ 
+ -----------------------------------加载功能---------------------------------------------------------------------
+ 通常通过js或者css来加载
+ method:请求url的方式
+ fitColumns:是否有滚动条，还是自适应（true），
+ rownumbers:是否实现行号
+ singleSelect:是否一次选中一个
+ url:请求的url路径
+ fit：
+ toolbar：
+ collapsible:是否可以折叠
+ rownumbers:是否显示行号，true
+ toolbar:
+  -----------------------------------分页功能---------------------------------------------------------------------
+ pagination:是否分页
+ pageSize：每页多少条数据
+ pageList:
+ pageNumber:初次显示第几页，如：pageNumber:2显示第二页
+ pagePosition：设置分页工具栏显示的位置，默认为buttom，可以选：top,buttom,both。
+ 注意：pageList和pageSize需要一起使用
+ 
+ 表格中的数据是通过post请求，向后台请求 http://www.localhost:8080/jude/admin/goods/list，请求传递的参数是page和rows
+ page表示第几页，rows表示第几行。
+ 
+@RequestMapping("/list")
+public Map<String,Object> list(Goods goods,@RequestParam(value="page",required=false)Integer page,
+	@RequestParam(value="rows",required=false)Integer rows)throws Exception{
+	Map<String, Object> resultMap = new HashMap<>();
+	List<Goods> goodsList=goodsService.list(goods, page, rows, Direction.ASC, "id");
+	Long total=goodsService.getCount(goods);
+	resultMap.put("rows", goodsList);
+	resultMap.put("total", total);//多少条数据
+	return resultMap;
+}
+
+响应的JSON格式：
+	{
+		"total":26, 
+		"rows":
+		[
+			{
+				"id":1,
+				"code":"0001",
+				"name":"陶华碧老干妈香辣脆油辣椒",
+				"model":"红色装",
+				"type":{
+					"id":10,
+					"name":"地方特产",
+					"state":0,
+					"icon":"icon-folder",
+					"pId":3},
+				"unit":"瓶",
+				"lastPurchasingPrice":8.5,
+				"purchasingPrice":6.32,
+				"sellingPrice":8.5,
+				"inventoryQuantity":175,
+				"minNum":1000,"state":2,
+				"saleTotal":0,
+				"producer":"贵州省贵阳南明老干妈风味食品有限公司",
+				"remarks":"好卖",
+				"codeOrName":null
+			},略
+		]
+	}
+ -----------------------------------排序功能---------------------------------------------------------------------
+ sortName:设置哪些列可以排序，如sortName:'id'
+ sortOrder:设置列排序的顺序，ASC和Desc，默认为ASC
+ remoteSore:是否启动服务端排序，默认值为true。
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
