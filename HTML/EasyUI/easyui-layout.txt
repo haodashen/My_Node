@@ -1,0 +1,59 @@
+布局容器用来展示完整页面，按照上北、下南、左西、右东的方位顺序，共由这4个边缘面板及中间1块内容面板组成。每个边缘区域面积都可以
+通过拖拽其边缘框来改变大小，也可以单击折叠按钮将面板折叠起来。
+
+	<div id="cc" class="easyui-layout" style="width:600px;height:400px;">
+		<div data-options="region:'north',title:'North Title',split:true" style="height:100px;"></div>
+		<div data-options="region:'south',title:'South Title',split:true" style="height:100px;"></div>
+		<div data-options="region:'east',title:'East',split:true" style="width:100px;"></div>
+		<div data-options="region:'west',title:'West',split:true" style="width:100px;"></div>
+		<div data-options="region:'center',title:'center title'" style="padding:5px;background:#eee;"></div>
+	</div>
+
+----------------------------------------------属性-----------------------------------------------------------
+fit：如果设置为true，布局组件会自使用父容器，当使用body标签创建布局时，默认会自动最大。
+
+----------------------------------------------区域面板属性-----------------------------------------------------------
+区域面板属性，一般都是写在div中。
+region：定义布局面板位置，可用值：north、south、east、west、center。
+split：是否可以通过分割栏改变面板大小
+collapsible：是否显示折叠按钮。
+minWidth：可拖拽到的最小面板宽度
+maxWidth：可拖拽到的最大面板宽度
+expandMode：单击折叠面板时候的展开模式，可用值：float、dock和null。
+	float：区域面板展开并浮动在顶部，当鼠标焦点离开面板时会自动隐藏。采用次模式必须先单击折叠一次面板，然后鼠标焦点离开时才会
+			自动隐藏。
+	dock：区域面板展开并钉在面板上，在鼠标焦点离开面板时不会自动隐藏。
+	null：什么也不会发生
+collapsedSize：折叠后的面板大小，默认值为28
+hideCollapsedContent：是否隐藏面板折叠后的指定内容信息。
+collapsedContent：设置面板折叠后需要显示的内容
+	如：<div id="bar">
+			<a class="easyui-linkbutton" style="width:100%;" data-options="iconCls:'layout-button-right'" onclick="$('#cc').layout('expand','west')">返回</a>
+			<a class="easyui-linkbutton" style="width:100%;" data-options="iconCls:'icon-large-picture',size:'large',iconAlign:'top'">图片</a>
+			<a class="easyui-linkbutton" style="width:100%;" data-options="iconCls:'icon-large-shapes',size:'large',iconAlign:'top'">外观</a>
+			<a class="easyui-linkbutton" style="width:100%;" data-options="iconCls:'icon-large-smartart',size:'large',iconAlign:'top'">素材</a>
+			<a class="easyui-linkbutton" style="width:100%;" data-options="iconCls:'icon-large-chart',size:'large',iconAlign:'top'">图标</a>
+		</div>
+		$('#cc').layout('panel','west').panel({
+				expandMode:null,
+				hideCollapsedContent:false,
+				collapsedSize:68,
+				collapsedContent:function(){
+					return $('#bar');
+				}
+		});
+hideExpandTool：是否隐藏面板上的折叠按钮扩展工具栏
+
+
+----------------------------------------------方法-----------------------------------------------------------
+resize：重新设置面板大小，不带参数时会自动刷新布局页面。注意：此方法在直接将body作为布局对象或者fit属性设置为true时
+		均无效。参数对象包括如下属性：width和height。
+panel：返回指定的面板
+	$('#cc').layout('panel','north').panel({
+			iconCls:'icon-add',
+			title:'North',
+	});
+collapse：折叠指定的面板。$('#cc').layout('collapse','west');
+expand：展开指定的面板
+split：给指定的面板区域添加分割线。
+		

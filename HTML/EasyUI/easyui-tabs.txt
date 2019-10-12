@@ -1,0 +1,76 @@
+选项卡的作用就是显示一批面板，但在同一个时刻它只会显示一个面板，每个选项卡面板可以设置一些小的按钮工具菜单。
+
+----------------------------------------属性------------------------------------------------
+plain：为true时，将不会显示控制面板的颜色
+tabWidth：标签条的宽度
+tabHeight
+scrollIncrement：选项卡滚动条每次滚动的像素值
+scrollDuration：每次滚动动画持续的时间，单位：毫秒
+justified：是否生成等宽标题选项卡
+headerWidth：选项卡标题的宽度，只有在tabPosition设置为'left'或'right'时才有效果
+selected：默认选中的标签页
+narrow：是否删除选项卡之间的空间
+pill：是否将选项卡标题样式改为气泡状
+
+----------------------------------------事件------------------------------------------------
+onContextMenu：右键单击选项卡页签时触发，一般用于弹出右键菜单
+	如：
+		<div id="mm" class="easyui-menu">
+			<div>Menu1</div>
+			<div>Menu2</div>
+		</div>
+		onContextMenu(e,title,index){
+			e.preventDefault();
+			$('#mm').menu('show',{
+				left:e.pageX,
+				top:e.pageY
+			});
+		}
+onAdd：添加新选项卡面板时触发
+onClose：关闭选项卡时触发
+onUpdate：更新选项卡时触发
+
+----------------------------------------方法------------------------------------------------
+add:添加新的选项卡，方法参数是一个可配置对象，不仅可以使用panel中所有的属性（部分属性或许没有效果），而且还多了几个选项卡面板独有的属性
+	如：
+	selected：设置为true时，该选项卡会被选中
+	disabled：设置为true，选项卡被禁用
+	index：用于指定新选项卡的排列位置
+	$('#tt').tabs('add',{
+			id:'new_tab',
+			title:'Tab4',
+			content:'新面板',
+			closable:true,
+			index:0,
+			disabled:true
+	});
+update：更新指定的选项卡面板，param参数包含了3个属性：tab：要更新的选项卡面板。type：更新类型。可选值有header，body，all，
+		此参数的作用在于限制更新范围，一般很少用。options：要更新的配置对象参数。该参数的设置方法和add一致，同样可以使用panel面板中的所有
+		属性及新增的selected和disabled属性，但不可以使用index改变面板位置。
+		如：
+		var tab = $('#tt').tabs("getTab",2);
+		$('#tt').tabs('update',{
+			tab:tab,
+			options:{
+				title:'新的标题',
+				selected:true,
+				content:"新的内容",
+				extractor:function(data){
+					alert(data);
+				}
+			}
+		});
+resize：重置选项卡容器大小和布局
+tabs：返回所有选项卡面板的对象
+getTab：获取指定的选项卡面板对象，参数可以是选项卡面板的标题或者索引。
+	如：$('#tt').tabs('getTab',2);
+getTabIndex：获取指定选项卡面板的索引号。如：获取当前选择的选项卡面板对象所对应的索引号：
+		     var tab = $('#tt').tabs('getSelected');
+			 var index = $('#tt').tabs('getTabIndex',tab);
+close：关闭指定的选项卡
+scrollBy：滚动选项卡标题指定的像素数量，负值向右滚动，正值向左滚动
+
+
+
+
+

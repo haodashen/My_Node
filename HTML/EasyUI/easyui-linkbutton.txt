@@ -1,0 +1,42 @@
+	<a href="javascript:openPurchaseListGoodsAddDialog()" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加</a>
+	
+	<a href="javascript:openPurchaseListGoodsModifyDialog()" class="easyui-linkbutton" iconCls="icon-edit" plain="true">修改</a>
+	
+    <a href="javascript:deletePurchaseListGoods()" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+	
+	按钮灰色：
+	<a href="javascript:xxx" class="easyui-linkbutton" data-options="iconCls:'icon-remove',disabled:'true'">xxx</a>
+	
+	是否扁平化：
+	<a href="javascript:xxx" class="easyui-linkbutton" data-options="iconCls:'icon-#',plain:'true'">xxx</a>
+	
+---------------------------------属性-------------------------------------------
+text：按钮文字
+iconAlign：按钮图标位置。可用值：left、right、top、buttom
+plain：是否显示简洁效果，一般用于工具栏时使用此属性
+group：指定相同组名称的按钮同属于一个组，组名称可任意定义
+toggle：是否允许切换选中状态。
+selected：是否定义按钮初始的选择状态。
+
+<script>
+$(function(){
+	$('#btn').linkbutton({
+		width:150,
+		height:50,
+		iconCls:'icon-save',
+		iconAlign:'left',
+		text:'后台数据保存',
+		toggle:false
+	});
+});
+</script>
+</head>
+<body>
+	<a id="btn">按钮</a>
+</body>
+
+---------------------------------方法-------------------------------------------
+options：
+resize：
+disable：
+select：

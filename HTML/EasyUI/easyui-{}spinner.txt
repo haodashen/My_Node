@@ -1,0 +1,155 @@
+微调器：结合文本框和两个小按钮。
+------------------------------------spinner属性---------------------------------
+width
+height
+min
+max
+increment：单击微调按钮时的增加量
+spinAlign：微调按钮对齐方式。可用值：left、right、horizontal、vertical。
+spin：单击微调按钮时调用的函数，down参数对应向下按钮
+------------------------------------spinner方法---------------------------------
+onSpinUp：单击向上微调按钮时触发
+onSpinDown：单击向下微调按钮时触发
+------------------
+	<input id="s">
+	$('#s').spinner({
+		width:300,
+		value:0.00,
+		spinAlign:'horizontal',
+		onSpinUp:function(){
+			var v = parseFloat($('#s').spinner('getValue'))+1;
+			$('#s').spinner('setValue',v);
+		},
+		onSpinDown:function(){
+			var v = parseFloat($('#s').spinner('getValue'))-1;
+			$('#s').spinner('setValue',v);
+		},
+	});
+----------------------------numberspinner数值微调器-----------------------------------------------
+<input id="ss" class="easyui-numberspinner">
+由于numberbox组件precision默认值为0，spinner组件的increment默认增量值为1，因此输入框中只能输入整数，且只能按1的步长来增减。
+<input id="ss" >
+$('#ss').numberspinner({
+	width:300,
+	label:'请输入数值：',
+	labelWidth:60,
+	value:123.45678,
+	precision:4,
+	increment:0.01,
+	min:80,
+	max:200,
+	groupSeparator:',',
+	suffix:'%',
+	buttonText:'测试',
+	spinAlign:'horizontal',
+	onClickButton:function(){
+		var v = $(this).numberbox('getValue');
+		alert(v);
+	},
+	formatter:function(value){
+		if(isNaN(value))
+			return null;
+		var result = (value*100).toString();
+		index = result.indexOf('.');
+		if(index == -1){
+			result+=".00%";
+		}else if(result.substr(index+1).length==1){
+			result+="0%";
+		}else{
+			result = result.substr(0,index+3)+"%";
+		}
+		return result;
+	},
+	parser:function(s){
+		var str = s.toString();
+		if(str.indexOf('%') == -1){
+		var min = $(this).numberspinner('options').min;
+		var max = $(this).numberspinner('options').max;
+		if(s>max)
+			return max;
+		else if(s<min)
+			return min;
+		else
+			return s;
+		}	
+		else{
+			var v = str.replace('.00%','').replace('.0%','').replace('%','');
+			return parseFloat(v)/100;
+		}
+	}
+});
+
+----------------------------timespinner时间微调器-----------------------------------------------
+
+separator：小时、分钟和秒之间的分隔符
+showSeconds：是否显示秒钟信息
+highlight：单击微调按钮时处始选中的部分。0=小时、1=分钟、2=秒。
+selections：允许选择微调的时间部分
+formatter：用于返回格式化的日期时间字符串
+parser：用于解析显示字符串并返回日期时间
+其中formatter和parse必须成对同时设置。
+-------------------------
+<input id="ts"/>
+$('#ts').timespinner({
+	width:200,
+	showSeconds:true,
+	spinAlign:'horizontal',
+	highlight:2,
+	increment:2,
+	selections:[[0,2],[6,8]];
+});
+注意：在设置了selections属性之后，highligh用来指定的默认高亮部分也会同时发生变换。比如：在没设置selections时，1值分钟，现在则是指的是秒
+	  因为在selections的数值中，[6,8]的序号就是1.
+本组件是如何划分时间的各个部分呢？每个数组的第1个数字为起始位置序号（从0开始），第2个数字为序号加上要选择的字符长度。
+时：[0,2]:0是序号（从第1个字符开始）,2=0（序号）+2（字符长度）。
+分：[3,5]:3是序号（从第4个字符开始）,5=3（序号）+2（字符长度）。
+秒：[6,9]:6是序号（从第7个字符开始）,8=6（序号）+2（字符长度）。
+
+----------------------------datetimespinner日期时间微调器-----------------------------------------------
+日期时间微调器扩展自timespinner。
+selections：默认值为[[0,2],[3,5],[6,10],[11,13],[14,16],[17,19]]，分别表示月、日、年、时、分、秒。
+
+-----------------------------
+<input id="ds"/>
+$('#ds').datetimespinner({
+	width:250,
+	value:'8/18/2018 10:30:30',
+	showSeconds:true,
+	spinAlign:'horizontal',
+	highlight:2,
+	increment:2,
+	selections:[[0,2],[6,8]],
+	formatter:function(date){
+		var y=date.getFullYear();
+		var m=date.getMonth()+1;
+		var d=date.getDate();
+		var h=date.getHours();
+		var M=date.getMinutes();
+		var s=date.getSeconds();
+		m=m<10?'0'+m:m;
+		d=d<10?'0'+d:d;
+		h=h<10?'0'+h:h;
+		M=M<10?'0'+M:M;
+		s=s<10?'0'+s:s;
+		return y+'-'+m+'-'+d+' '+h+":"+M+':'+s;
+	}
+});
+parser属性；对微调器中显示的日期时间字符串进行解析，然后返回需要的日期时间值。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

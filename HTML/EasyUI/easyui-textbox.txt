@@ -1,0 +1,118 @@
+<input type="text" id="s_codeOrName" size="30" onkeydown="if(event.keyCode==13) searchGoods()"/>
+点击键盘Enter键，调用searchGoods方法。
+
+<input class="easyui-textbox" style="width:200px;"/>
+------------------------------------------------------------------------------------------------------------------------
+文本输入框是由验证框扩展而来的，那么validatebox中的属性在textbox中都可使用，只是有的属性可能没有效果。
+
+--------------------------------------------属性----------------------------------------------------------
+textbox是基于validatebox扩展而来的，那么validatebox中的所有属性在textbox中都可使用，只是有的属性可能没有效果。
+新增属性：
+prompt：在输入框内显示的提示信息
+value：默认值。一旦设置，prompt的信息将不会显示
+cls：给组件添加CSS类名
+	cls:'c1~c8'
+type：文本框类型，可用值：text和password
+multiline：是否对行文本框
+icons：文本框图标工具栏。每个选项都可以设置一下属性：
+	iconCls：指定图标的class样式名称。
+	disabled：指明是否禁用该图标
+	handler：用于处理单击该图标以后的动作
+	如：icons:[{
+				iconCls:'icon-add',
+				handler:function(e){
+					$(e.data.target).textbox('setValue','这是添加的内容！');
+				}
+			},{
+				iconCls:'icon-remove',
+				disabled:true,
+				handler:function(e){
+					$(e.data.target).textbox('clear');
+				}
+			}]
+iconCls：文本框背景图标
+	iconCls:'icon-man'
+iconAlign：图标位置。可用值：left、right。
+iconWidth：图标宽度
+
+label：文本框标签
+	label:'请输入：'
+	label:$('#label'),
+labelWidth：标签宽度
+labelPosition：标签位置、可用值：before、after、top。
+buttonText：文本框附加按钮显示的文本内容
+buttonAlign：附加按钮的显示位置。可用值：left、right。
+buttonIcon：文本框附加按钮显示的图标。
+
+--------------------------------------------方法----------------------------------------------------------：
+options：返回属性对象
+textbox：返回文本框对象
+button：返回按钮对象
+clear：清除组件中的值
+initValue：初始化组件值，该方法不会触发onChange事件
+setValue：设置组件的值
+getValue：
+setText：设置显示的文本值
+
+--------------------------------------------事件----------------------------------------------------------
+onClickButton：在用户点击附加按钮的时候触发。
+onClickIcon：在用户点击工具图标时候触发
+	由于工具图标栏本身设置了handler事件，同时又在组件中设置onClickIcon事件时，则单击图标首先触发onClickIcon，
+	然后执行handler。
+
+----------------------------------------------------------------------------------------------------------------
+	<script>
+	$(function(){
+		$('#in').textbox({
+			width:300,
+			prompt:'请输入用户名',
+			type:'text',
+			cls:'c8',
+			multiline:false,
+		//	label:$('#label'),
+			//labelWidth:60,
+			label:'请输入：',
+			labelPosition:'top',
+			/*icons:[{
+				iconCls:'icon-add',
+				handler:function(e){
+					$(e.data.target).textbox('setValue','这是添加的内容！');
+				}
+			},{
+				iconCls:'icon-remove',
+				disabled:true,
+				handler:function(e){
+					$(e.data.target).textbox('clear');
+				}
+			}],*/
+			iconAlign:'right',
+			iconCls:'icon-man',
+			iconWidth:28,
+			buttonText:'点我查询',
+			buttonIcon:'icon-ok',
+			buttonAlign:'left'
+		});
+		$('#t').textbox({
+			width:200,
+			prompt:'请输入用户名',
+			iconWidth:38,
+			iconCls:'icon-man',
+		});
+	});
+	</script>
+</head>
+<body>
+	
+	<input class="easyui-textbox" data-options="iconCls:'icon-search'" style="width:300px"><br><br>
+	<input id="in" />
+	<br><br>
+	<input id="t" />
+	<br>
+</body>
+
+关于editable和readonly：1.如果把editable设置为false，仅仅是文本框内容不能编辑修改，但按钮和图标仍可以正常使用。
+	2.如果把readonly设置为true，则整个文本框都处于只读状态，连按钮和图标都无法使用。
+
+
+
+

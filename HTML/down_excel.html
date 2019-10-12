@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <script type="text/javascript">
+		function isIEExplorer(){
+			 var userAgent = window.navigator.userAgent; //取得浏览器的userAgent字符串 
+			 var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1; //判断是否IE<11浏览器  
+			 var isEdge = userAgent.indexOf("Edge") > -1 && !isIE; //判断是否IE的Edge浏览器  
+			 var isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0") > -1;
+			 if(isIE || isEdge || isIE11 ) {
+					return true ;
+			}
+			return false;
+		}
+        function download_excel(tableid) {
+            if(isIEExplorer())
+            {
+				var curTbl = document.getElementById(tableid);
+                var oXL = new ActiveXObject("Excel.Application");
+                var oWB = oXL.Workbooks.Add();
+                var xlsheet = oWB.Worksheets(1);
+                var sel = document.body.createTextRange();
+                sel.moveToElementText(curTbl);
+                sel.execCommand("Copy");
+                oXL.Visible = true;
+				xlsheet.Paste();
+                try {
+                    var fname = oXL.Application.GetSaveAsFilename("Excel.xls", "Excel Spreadsheets (*.xls), *.xls");
+                } catch (e) {
+                    print("Nested catch caught " + e);
+                } finally {
+                    oWB.SaveAs(fname);
+                    oWB.Close(savechanges = false);
+                    oXL.Quit();
+                    oXL = null;
+                    idTmr = window.setInterval("Cleanup();", 1);
+                }
+            }
+            else
+            {
+                tableToExcel(tableid)
+            }
+        }
+        function Cleanup() {
+            window.clearInterval(idTmr);
+            CollectGarbage();
+        }
+        var tableToExcel = (function()
+        {
+            var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html><head><meta charset="UTF-8"></head><body><table>{table}</table></body></html>',
+                base64 = function(s)
+                { return window.btoa(unescape(encodeURIComponent(s))) },
+                format = function(s, c) {
+                    return s.replace(/{(\w+)}/g,
+                        function(m, p) { return c[p]; }) }
+            return function(table, name) {
+                if (!table.nodeType) table = document.getElementById(table)
+                var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+                window.location.href = uri + base64(format(template, ctx))
+            }
+        })();
+    </script>
+</head>
+    <body>
+    <div style="text-align:center;width: 1200px; height: 350px">
+        <table class="tab" border="1px" id="All" style="margin:auto">
+            <tr style="background-color:#ffff66; font-weight:bold;">
+                <td>序号</td>
+                <td>处理状态</td>
+                <td>公司名称</td>
+                <td>公司代码</td>
+                <td>供货产品</td>
+                <td>付款方式</td>
+                <td>月结方式</td>
+                <td>币别</td>
+                <td>本次付款月份</td>
+                <td>付款金额</td>
+                <td>自身SN号</td>
+            </tr>
+			<tr>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+			</tr>
+			<tr>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+			</tr>
+			<tr>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+			</tr>
+			<tr>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+			</tr>
+			<tr>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+			</tr>
+			<tr>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+				<td>demo</td>
+			</tr>
+        </table>
+        <button type="button" id="btnExport" onclick="download_excel('All')">导出Excel</button>
+    </div>
+
+    </body>
+</html>

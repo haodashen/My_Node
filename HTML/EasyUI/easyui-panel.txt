@@ -1,0 +1,122 @@
+面板作为承担其他内容的容器，是构建其他组件的基础，它可以很容易地嵌入到web页面的任何位置，同时还提供了折叠，关闭，最大化，最小化等功能。
+
+----------------------------------------常规属性------------------------------------------------
+collapsible：是否显示可折叠按钮。
+collapsed：是否在初始化时候折叠面板
+closable：是否显示关闭按钮
+halign：允许面板头部放置在左侧还是右侧。可选值：left，right。
+minimizable：是否显示最小化按钮
+maximizable：是否显示最大化按钮
+minimized：是否在初始化的时候最小化面板
+maximized：是否在初始化的时候最大化面板
+noheader：是否显示面板标题
+header：=-
+footer：
+
+----------------------------------------外观属性------------------------------------------------
+border：是否显示面板边框
+iconCls：图标的CSS类名
+cls：CSS类名，对整个面板头部和主题内部都生效的。如：
+		<style type="text/css">
+			.ct{
+				text-align:center;
+			}
+		</style>
+		cls:'ct'
+closeDuration：关闭面板持续时间，默认值为400
+openDuration：打开面板持续时间
+openAnimation：打开面板时的动画，slide从上到下，fade由浅入深，show由左上到右下
+closeAnimation：关闭面板时的动画，slide从上
+tools：用于自定义工具菜单，通过数组或者选择器创建
+	选择器方式：
+				<div id="tools">
+					<a  class="icon-add" onclick="javascript:alert('add')"></a>
+					<a  class="icon-edit" onclick="javascript:alert('edit')"></a>
+					<a  class="icon-cut" onclick="javascript:alert('cut')"></a>
+				</div>
+		tools:'#tools'
+	数组方式：tools:[
+					{
+						iconCls:'icon-add',
+						handler:function(){
+							alert("add");
+						}
+					},
+					{
+						iconCls:'icon-edit',
+						handler:function(){
+							alert("edit");
+						}
+					},
+					{
+						iconCls:'icon-cut',
+						handler:function(){
+							alert("cut");
+						}
+					}
+				]
+
+			
+
+
+----------------------------------------数据属性------------------------------------------------
+content：设置面板内容。注意content的值可以来自页面的某个元素，如：
+href：从url读取数据并且显示到面板主题中，
+loadingMessage：加载远程数据时，在面板内显示一条消息
+loader：以自定义的AJAX方式从远程服务器加载内容页
+	loader:function(param,success,error){
+		$.ajax({
+			url:'',
+			data:{
+				name:'',
+				subject:''
+			},
+			success:function(data){
+				success()data;
+			},
+			error:function(error){
+				error();
+			}
+		});
+	}
+	param：发送给远程服务器的参数对象。
+	success(data)：在检索数据成功的时候调用的回调函数
+	error()：在检索失败的时候调用的回调函数
+注意：即使使用了loader属性，href属性也不能为空，否则将无法启动远程访问，loader属性自然无效；或者在页面的相应DOM元素中加上一个不为空的href
+	  属性也是可以的。
+method：使用那种方式读取数据，可用值：get或post
+cache：在超链接首次载入时是否缓存面板内容
+extractor：如何在应答的远程数据中提取数据。
+	extractor:function(data){
+		alert(data);
+	}
+----------------------------------------事件------------------------------------------------
+onBeforeLoad
+onLoad
+onBeforeCollapse：在面板折叠之前出发，返回false可以取消折叠操作
+onRestore：面板恢复到原始大小时触发
+----------------------------------------方法------------------------------------------------
+options：返回属性以及事件对象
+panel：返回整个面板对象
+open：参数设置为true，打开面板时跳过onBeforeOpen事件函数
+refresh：刷新面板来装载远程数据。如果设置了新的参数，将自动重写旧的href属性
+	如：$('#p').panel('refresh')或者$('#p').panel('refresh','www.baidu.com')
+resize：重新设置面板大小和布局。不带参数时仅启到界面刷新效果，参数对象可以包含一个或多个属性：
+			width：新的面板宽度。height：新的面板高度。left：新的面板左边距位置。top：新的面板上边距位置。
+			
+maximize：最大化面板到父容器大小
+minimize：最小化面板
+restore：恢复最大化面板回到原来的大小和位置
+collapse：折叠面板主题
+expand：展开面板主题
+
+
+
+
+
+
+
+
+
+
+

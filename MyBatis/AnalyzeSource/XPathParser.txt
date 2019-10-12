@@ -1,0 +1,7 @@
+XPathParser各个字段的含义和功能： 
+	  private Document document;  //Document对象
+	  private boolean validation;  //是否开启验证
+	  private EntityResolver entityResolver;   //用于加载本地DTD文件
+	  private Properties variables;  //mybatis核心配置文件中的<properties>标签中键值对集合
+	  private XPath xpath;  //XPath对象
+

@@ -1,4 +1,19 @@
-﻿查看日志命令：
+基本配置：git config --global user.name xxx
+          git config --global user.email xxx
+		  git config --global core.editor emacs
+		  git config --list：列出当前Git可以找到的所有设置
+		  
+		  
+查看当前文件状态：git status
+                  git status -s：以简短的信息显示状态信息，为追踪的文件使用??标记，已暂存的文件使用A标记，已修改的文件使用M标记
+				  git status -u：列出没追踪的文件
+创建别名：Git不会自动补全命令，我们可以通过 git config命令来简化git命令。如：
+		  git config --global alias.co checkout
+          git cofnig --global alias.br branch
+		  git config --global alias.ci commit
+		  
+
+查看日志命令：
 	    git log filename
 	    git log --pretty=oneline：每一行显示一个提交
 	    git log --pretty=format:"%h - %an,%ar:%s" --graph：允许指定自己的输出格式。
@@ -14,17 +29,25 @@
                %ad              创作日期
                %ar              相对于当前日期的创作日期
                %cn              提交者的名字。
-	       %ce              提交者的电子邮箱
+	           %ce              提交者的电子邮箱
                %cd              提交日期
                %cr              相对于当前日期的提交日期
                %s               提交信息的主题
+	    如：git log --pretty=format "%h - %an , %ar : %s"
+		    git log --pretty=format "%h - %an , %ar : %s" --graph
 	    git log --oneline
+		git log --oneline --graph
 	    git reflog  查看提交的id
 	    git log --follow filename 继续列出出renames之外的文件的历史  Git在日志中回溯并找到内容相关联的整个历史记录
             git log --graph --pretty=oneline --abbrev-commit
             git log -p：显示每次提交所引入的差异（可以跟着-2，即每次显示最近两次的提交）
             git log --stat：查看每个提交的简要统计信息。
             git log since..util如：git log master~5..master
+		git log -p -num：显示每次提交所引入的差异，num用于显示最近的num次提交
+		git log -Sfunction_name：只输出"添加或删除指定字符串"的更改的提交
+			如：git log -S 
+		git log --oneline --decorate --graph --all：查看分支的分支的指向和项目历史的分支情况
+		
 
 版本后退:
 	git reset --hard 索引值  
@@ -38,9 +61,10 @@
 	  git remote add 别名 远程库地址：添加远程仓库
 	  git remote add -f alias repository
 	  git remote -v：显示Git存储的每个远程仓库对应的URL
+	  git remote show origin：查看远程仓库的更多信息
           git remote update:
           git remote rm:删除给定的远程版本库以及关联的远程追踪分支
-          git branch -r -d 别名/分支名：删除一个远程跟踪分支。
+          git branch -r -d 别名/分支名：删除一个远程跟踪分支。如：git branch -r -d orgin/dev
 	  git remote rename oldName newName:重命名远程版本库
           git remote set-url alias newURL：更改或更新远程版本库的URL
 	  git checkout -b branch_name [repository_alias]/[branch_name]：获取远程仓库指定分支的内容。
@@ -101,8 +125,6 @@ git checkout HEAD --filename：恢复删除文件
                   如：拉取远程分支dev到本地：git checkout -b dev origin/dev
                       git checkout --track origin/dev
 
-         
-
 删除远程分支：git push origin :remote_branch_name
               git push origin --delete remote_branch_name
 
@@ -125,13 +147,25 @@ git checkout HEAD --filename：恢复删除文件
 
 
 	  
-git hash-object file：计算和输出一个文件的sha-1值。
+git hash-object file：计算和输出一个文件的sha-1值。如： echo "test content" | git hash-object -w --stdin
+输出值：d670460b4b4aece5915caf5c68d12f560a9fe3e4
+	-w：将一个对象写入到对象数据库中
+	--stdin：从标准输入中读取一个对象。
+
 git config -l ：列出完整变量名的配置文件内容
 git commit --amend：修改上一条提交信息
 
 git ls-files:可以查看隐藏在对象模型下的东西，并且可以找到那些暂存文件的Sha-1值。
 
 git cat-file -p sha-1_value : 从给定的sha-1_value散列值吧它从对象库中提取出来。
+如：git cat-file -p d670460b4b4aece5915caf5c68d12f560a9fe3e4
+输出值：test content
+
+树对象：
+git cat-file -p master^{tree}：指定了master分支中最后一次提交所指向的树对象。
+
+git cat-file -t sha-1_value：获取对象的类型
+
 git ls-files -s
 git ls-files --stage
 git write-tree
