@@ -18,5 +18,9 @@
 
   第六步：使用git pull origin master --allow-unrelated-histories成功进行了拉去
   第七步：git log 查看历史记录，发现git为我们进行了一次合并操作。
-
+  
+  
+2.windows下“gitk代码中文注释乱码”
+	git config --global gui.encoding utf-8
+3.
 
