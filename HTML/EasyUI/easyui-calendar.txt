@@ -1,0 +1,93 @@
+日历组件用于显示一个月的具体日期，它允许用户选择日期或移动到某月、某年。
+
+------------------------------------属性--------------------------------------------
+showWeek：是否显示周别。
+weeks：周标题列表内容，['S','M','T','W','T','F','S']
+months：月标题列表内容
+year：默认显示的年
+month：默认显示的月
+current：默认日期  如：current:newDate(2019,10,4)
+weekNumberHeader：周别标签的显示内容
+firstDay：第一列从周几开始，其中0为周日，
+formatter：格式化日期显示内容，必须同时返回日期值。
+	formatter:function(date){
+		var d=date.getDate();
+		if(date.getDay == 1){
+			return "<div style='color:red;'>"+d+"</div>";
+		}
+		return d;
+	}
+validator：日期选择验证器，返回false时将被禁止选择，对于不符合要求的日期将被禁止选择
+   如：假定只能选择指定时间的前后十天
+	validator:function(date){
+		var d = new Date(2019,10,4);
+		var d1 = new Date(d.getFullYear(),d.getMonth(),d.getDate()-10);
+		var d2 = new Date(d.getFullYear(),d.getMonth(),d.getDate()+10);
+		return d1<=date && date<=d2;
+	}
+
+------------------------------------方法--------------------------------------------
+moveTo：移动日期到指定的日期
+	$('#cc').calendar('moveTo',new Date(2018,10,3));
+------------------------------------事件--------------------------------------------
+onSelect：选择日期时触发
+	onSelect:function(date){
+		var str = date.getFullYear()+"年"+date.getMonth()+1+"月"+date.getDate()+"日";
+		$.messager.alert("提示","你选择的日期是："+str,"warning")
+	}
+onChange：更改日期时触发。
+
+
+
+
+
+
+
+
+
+unction dateFmt(date ,p){
+	var y = date.getFullYear();
+	var m,d,h,M,s,str;
+	$.each(['m','d','h','M','s'],function(i,v){
+		switch(v){
+			case 'm':
+				value = date.getMonth()+1;
+				break;
+			case 'd':
+				value = date.getDate();
+				break;
+			case 'h':
+				value = date.getHours();
+				break;
+			case 'M':
+				value = date.getMinutes();
+				break;
+			case 's':
+				value = date.getSeconds();
+				break;
+		}
+		eval(v+'=("'+value+'".length==1)?"0'+value+'":"'+value+'";');
+	});
+	switch(p){
+		case 'd':
+			str=y+'-'+m+'-'+d;
+			break;
+		case 't':
+			str=y+"-"+m+'-'+d+' '+h+':'+M+":"+s;
+			break;
+	}
+	return str;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

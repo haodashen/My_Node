@@ -1,0 +1,181 @@
+应付金额：<input type="text" id="amountPayable" 
+	name="amountPayable" size="10" readonly="readonly" class="easyui-validatebox" required="true"/>
+	
+	
+---------------------------------常用属性-----------------------------------------
+required：该文本框是否必填内容
+validType：所输入内容的验证类型和规则
+missingMessage：当文本框未填写时出现的提示信息
+invalidMessage：当文本框内容被验证为无效时出现的提示信息
+novalidate：是否关闭验证功能
+editable：是否允许输入编辑内容
+readonly：是否将文本框设为只读（表单提交时会被提交）
+validateOnCreate：是否在创建该组件时就进行验证
+validateOnBlur：是否在文本框失去焦点时进行验证
+delay：验证延迟时间
+deltaX：提示信息在水平方向上的位移距离
+tipPosition：提示信息显示的位置。可选值：left、right、top、bottom
+
+<p>E-Mail：<input id="in" /></p>
+$(function(){
+	$('#in').validatebox({
+		required:true,
+		validType:'email',
+		missingMessage:'输入有效的邮箱地址',
+		invalidMessage:'邮箱地址无效',
+		novalidate:false,
+		editable:true,
+		validateOnBlur:true,
+		deltaX:5,
+		tipPosition:'left'
+	});
+});
+---------------------------------常用方法-----------------------------------------
+isValid：调用validate方法并返回验证结果：true或false。
+validate：验证文本框的内容是否有效，此方法很少直接使用
+enableValidation：启用验证
+disableValidation：
+resetValidation：重置验证
+enable：启用该组件
+disable：
+readonly：启用/禁用只读组件
+
+
+
+---------------------------------组件自带的验证规则-----------------------------------------
+组件validatebox本身已经定义好了一些常用的规则：
+	email：匹配E-Mail的正则表达式规则。
+	url：匹配URL的正则表达式规则
+	length[x,y]：允许在x到y之间的字符个数。
+	如：validType:['length[5,10]','email']
+
+---------------------------------自定义验证规则-----------------------------------------
+自定义验证规则，需要重写$.fn.validatebox.defaults.rules中的验证器函数和无效消息。如：定义一个最小长度(minLength)的自定义验证
+$.extend($.fn.validatebox.defaults.rules,{
+	minLength:{
+		validator:function(value,param){
+			return value.length>=param[0];
+		},
+		message:'请至少输入{0}个字符！'
+	}
+});
+$.extend()是jQuery中的扩展方法。接受两个参数，一个是扩展对象，另一个是扩展的具体内容，是一个参数对象。
+$.fn.validatebox.defaults表示validatebox组件的默认值，后面再加上rules表示默认值中的验证规则。这个就是我们要扩展的对象。
+验证规则必须包含验证器函数（validator）和验证未通过时的无效信息（message）。
+验证器可以传入两个参数value和param，value表示要验证的值，param表示验证规则参数数组；验证器的返回值只能是true或false。
+<p>UserName：<input id="un" /></p><br>
+$('#un').validatebox({
+	required:true,
+	validType:'minLength[5]',
+	validateOnBlur:true,
+});
+---------------------------------自定义验证规则验证前后是否输入相同-----------------------------------------
+$.extend($.fn.validatebox.defaults.rules,{
+	minLength:{
+		validator:function(value,param){
+			return value.length>=param[0];
+		},
+		message:'请至少输入{0}个字符！'
+	},
+	equals:{
+		validator:function(value,param){
+			return value==$(param[0]).val();
+		},
+		message:'输入的内容和上边不一致！'
+	}
+});
+<p>密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码：<input id="pwd" /></p>
+<p>确认密码：<input id="repwd" /></p><br>
+$('#pwd').validatebox({
+	required:true,
+	validType:'minLength[10]',
+});
+$('#repwd').validatebox({
+	required:true,
+	validType:'equals["#pwd"]',
+});
+---------------------------------远程验证规则-----------------------------------------
+$.extend($.fn.validatebox.defaults.rules,{
+	nameCheck:{
+		validator:function(value){
+			var result = true ;
+			$.ajax({
+				url:'www.localhsot:8080/easyui/validateName',
+				async:false,
+				data:{
+					name:value
+				},
+				success:function(data){
+					result = data;
+				}
+			});
+			return result;
+		},
+		message:'该用户名称已经被注册！'
+	}
+});
+这里的url请求必须返回布尔值true或false。
+
+---------------------------------提示信息-----------------------------------------
+1.当文本框未填写内容时的提示信息，前提是required属性为true。
+2.当验证无效时出现的提示。
+3.如何在验证通过时也给出人性化的提示。
+<p>用户名：<input id="uname" /></p><br>
+$('#uname').validatebox({
+	required:true,
+	missingMessage:'输入用户名',
+	validType:'length[5,10]',
+	err:function(target,message,action){
+		message = message || '用户名格式正确';
+		$.fn.validatebox.defaults.err(target,message,action);
+	}
+});
+err的属性值为验证无效时的事件处理函数。该函数有3个参数：target为当前的DOM元素，message为无效时的提示信息，action为提示信息的隐藏或显示动作。一般
+只需要用到前两个参数。
+
+---------------------------------修改提示信息样式-----------------------------------------
+$('#uname').validatebox({
+	required:true,
+	missingMessage:'输入用户名',
+	prompt:'用户名格式正确',
+	validType:'length[5,10]',
+	err:function(target,message,action){
+		var t = $(target);
+		message = message || t.validatebox('options').prompt;
+		var m = t.next('.message');
+		if(!m.length){
+			m=$('<div class="message"></div>').insertAfter(t);
+		}
+		m.html(message);
+	}
+});
+.message{
+			margin:4px 0 0 0;
+			padding:0;
+			color:red;
+			font-size:16px;
+		}
+修改了err函数：先用next方法查找紧接在当前文本框后面且包含class样式为message的DOM元素。如果该元素不存在，就新建一个div元素，并
+把它插入到当前文本框元素后面，最后将message信息设置为新建div元素的内容。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

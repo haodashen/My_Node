@@ -14,3 +14,169 @@ $(document).ready(function(){
 		$("#purchaseDate").datebox("setValue",genTodayStr()); // 设置当前日期
 		$("#dh").load('/jude/admin/purchaseList/getPurchaseNumber');	
 });
+------------------------------------------------------------------------------------------
+列表下拉框是基于combo和textbox扩展而来的增强型组件，用户不仅可以使用本地或远程数据方便生成列表框，更可以
+实现多选、图标按钮、快速筛选查询等功能。
+该组件依赖combo组件
+--------------------------------------属性----------------------------------------------------
+列表下拉框属性扩展自combo和textbox，以下是新增属性：
+
+limitToList：输入值是否只能是列表框中的内容
+data：本地要加载的列表数据。
+	data:[{
+			id:1,
+			text:'餐饮店'
+		},{
+			id:2,
+			text:'休闲方便食品'
+		},{
+			id:3,
+			text:'咖啡食品',
+			selected:true
+		},{
+			id:4,
+			text:'饮料',
+			desc:'饮料好喝吗？'
+		}],
+valueField：指定列表框的”值“来源字段
+	valueField:'id',
+textField：指定列表框的”文本说明“来源字段
+	textField:'text',
+formatter：返回格式化后的列表框内容
+	formatter:function(row){
+		//首先判断，数据行是否有desc描述信息
+		var desc = (row.desc!=undefined)?'<br><span style="color:#888;">'+row.desc+'</span>':'';
+		var s='<span style="font-weight:bold;">'+row.text+'</span>'+desc;
+		return s;
+	}
+groupField：指定列表框的”分组“来源字段
+groupPosition：定位分组选项。可用值：static、sticky。默认情况下，分组名称会随着用户的拖动而跟着滚动。使用该属性后，可以
+				将分组标签固定在列表框的顶部，当同一个组内的选项全部滚动显示完毕之后，该分组标签也会自动消失或切换成下一个
+				分组标签。
+groupFormatter：返回格式化后的分组标题
+	<select id="c"></select>
+	$(function(){
+		$('#c').combobox({
+			label:'请选择行业',
+			labelPosition:'top',
+			width:150,
+			panelHeight:160,
+			selectOnNavigation:true,
+			data:[{
+				id:1,
+				text:'餐饮店',
+				group:'餐饮食品'
+			},{
+				id:2,
+				text:'休闲方便食品',
+				group:'餐饮食品'
+			},{
+				id:3,
+				text:'咖啡食品',
+				selected:true,
+				group:'餐饮食品'
+			},{
+				id:4,
+				text:'饮料',
+				desc:'饮料好喝吗？',
+				group:'餐饮食品'
+			},{
+				id:5,
+				text:'品牌汽车',
+				group:'汽车'
+			},
+			{
+				id:6,
+				text:'电动汽车',
+				group:'汽车'
+			},{
+				id:7,
+				text:'跑步',
+				group:'运动'
+			}],
+			valueField:'id',
+			textField:'text',
+			formatter:function(row){
+				var desc = (row.desc!=undefined)?'<br><span style="color:#888;">'+row.desc+'</span>':'';
+				var s='<span style="font-weight:bold;">'+row.text+'</span>'+desc;
+				return s;
+			},
+			groupField:'group',//指定了分组名称
+			groupPosition:'sticky',//
+			groupFormatter:function(g){
+				var s = '<span style="color:red;border-bottom:1px solid blue">'+g+'</span>';
+				return s;
+			},
+		});
+		console.log($('#c').combobox('getValue'));
+	});
+showItemIcon：是否显示列表项图标
+filter：过滤本地数据（仅在data、mode为local时有效）
+url：通过JSON文件或远程加载列表数据，远程数据的动态加载，默认情况下，url远程加载设置完成之后并不会主动请求数据，只有用户在文本框中输入内容，
+	 且文本发生改变时才会动态地从远程加载符合条件的数据。也就是说，远程方式直接请求符合条件的数据，因而，filter属性在这里是无效的
+	 要实现远程数据加载，需要用到以下属性：
+	mode：该属性用户设置文本改变时如何读取列表数据。它有两个可选值：
+			local：本地读取方式。包括data属性值中的数据，以及url属性值为JSON文件时的数据。此为默认值
+			remote：远程读取方式，使用此方式时，用户在文本框中输入的内容将被当做名称为q的请求参数，被一并发送服务器以
+					请求检索新数据。
+    method：指定请求方式。
+loader：如何从远程服务器加载数据，返回false可取消加载
+	mode:'remote',
+	loader:function(param,success,error){
+		var fd=param.field || 'text';
+		var q = param.q | '';
+		if(q.length<=3) return false;
+		$.ajax({
+			url:'',
+			data:{
+				field:fd,
+				q:q,
+			},
+			method:'post',
+			dataType:'json',
+			success:function(data){
+				$('#c').combobox('loadData',data);
+			}
+		});
+	}
+	这里param是一个参数对象，它的参数内容来自于两个方面：用户输入以及queryParams属性中的设置。
+loaderFilter：返回过滤后的数据并显示，对本地和远程数据均有效
+
+--------------------------------------方法----------------------------------------------------
+getData：返回加载数据对象
+loadData：读取并加载列表数据
+select：选择指定项
+
+---------------------------------行业联动------------------------------------
+不同控件之间的数据关系。
+<select id="cc"></select>
+<select id="aa" ></select>
+$('#cc').combobox({
+	label:'请选择大行业：',
+	labelPosition:'top',
+	width:300,
+	panelHeight:200,
+	selectOnNavigation:true,
+	url:'www.localhost:8080/easyui/combobox',
+	mode:'remote',
+	valueField:'group',
+	textField:'group',
+	onSelect:function(record){
+		var url = 'www.localhost:8080/easyui/combobox?hy'+record.group;
+		$('#aa').combobox().combobox('reload',url);
+	}
+});
+$('#aa').combobox({
+	label:'请选择凶案行业：',
+	labelPosition:'top',
+	width:100,
+	panelHeight:200,
+	selectOnNavigation:true,
+	url:'',
+	mode:'remote',
+	valueField:'text',
+	textField:'text',
+});
+
+
+

@@ -1,0 +1,102 @@
+放置组件和拖动组件是相对应的，它可以将拖放的组件放置在当前容器中。
+
+--------------------------------------属性-----------------------------------------------------------
+accept：确定哪些可拖动元素将被接受；未指定时都可以接受
+
+
+--------------------------------------事件-----------------------------------------------------------
+onDragEnter：在被拖拽元素到放置区的时候触发
+onDragOver：在被拖拽元素经过放置区的时候触发
+onDragLeave：
+onDrop：
+
+--------------------------------------案例-----------------------------------------------------------
+
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Droppable</title>
+	 <script type="text/javascript" src="easyUI/jquery.min.js"></script>
+	 <script type="text/javascript" src="easyUI/jquery.easyui.min.js"></script>
+	 <script type="text/javascript src="easyUI/locale/easyui-lang-zh_CN.js"></script>
+	 <link rel="stylesheet" type="text/css" href="easyUI/themes/default/easyui.css">
+	 <link rel="stylesheet" type="text/css" href="easyUI/demo/demo.css">
+	 <link rel="stylesheet" type="text/css" href="easyUI/themes/icon.css">
+	 <link rel="stylesheet" type="text/css" href="easyUI/themes/color.css">
+	<style type="text/css">
+		.out{float:left;margin:20px;border:1px solid #ccc;}
+		.title{margin:10px;}
+		.dragitem{border:1px solid #ccc;width:50px;height:50px;line-height:50px;text-align:center;background:#DEDCDC;
+		          float:left;margin:10px;}
+		.over{background:#FBEC88;}
+		.assigned{border:1px solid #BC2A4D;}
+	</style>
+	<script>
+		$(function(){
+			$('.dragitem').draggable({
+				revert:true,
+				proxy:'clone',
+			});
+			$('#dd').droppable({
+				accept:'.dragitem',
+				onDragEnter:function(e,source){
+					$(this).addClass('over');
+					$(source).draggable('proxy').addClass('assigned');
+				},
+				onDragLeave:function(e,source){
+					$(this).removeClass('over');
+					$(source).draggable('proxy').removeClass('assigned');
+				},
+				onDrop:function(e,source){
+					$(this).removeClass('over');
+					//$(this).append($(source).addClass('assigned'));
+					if($(source).hasClass('dragitem')){
+						var c = $(source).clone().addClass('assigned');
+						var t = $(this).find(":contains('"+c.text()+"')");
+						var mark = (t.length==0);
+						if(t.length){
+								$.each(t,function(){
+									//这里的this是指t中循环到的DOM元素
+									if($(this).text()==c.text())
+										mark=false;
+									else
+										mark=true;
+								});
+						}
+						if(mark){
+							$(this).append(c);
+							c.draggable({
+								revert:true,
+								proxy:'clone'
+							});
+						}	
+					}
+				}
+			});
+			$('#souce').droppable({
+				accept:'.assigned',
+				onDragEnter:function(e,source){
+					$(this).addClass('over');
+				},
+				onDragLeave:function(e,source){
+					$(this).removeClass('over');
+				},
+				onDrop:function(e,source){
+					$(this).removeClass('over');
+					$(source).remove();
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+	<div id="source" class="out" style="width:72px;">
+		<div class="title">选项卡</div>
+		<div class="dragitem">苹果</div>
+		<div class="dragitem">香蕉</div>
+		<div class="dragitem">桔子</div>
+		<div class="dragitem">菠萝</div>
+	</div>
+	<div class="easyui-droppable out" style="width:220px;height:326px;" id="dd"></div>
+</body>
+</html>

@@ -1,0 +1,214 @@
+树组件
+---------------------------所有树都具有的属性-------------------------------
+id：对于静态树老说无所谓，但对于动态树来说很重要，用于加载远程数据。
+text：用来显示的节点文本。
+iconCls：用来指定节点显示的图标
+state：节点状态，可选值：open表示展开，默认值；close表示关闭。
+checked：表示该节点是否被选中。该属性需要与其他属性结合才生效。
+attributes：该属性值为对象，表示添加到该节点的自定义属性。
+childred：该属性值为数组，用于声明包含的下级若干节点。
+如：[{
+	"id":1,
+	"text":"百度产业",
+	"iconCls":"icon-baidu",
+	"state":'closed',
+	"attribute":{
+		"url":"https://www.baidu.com"
+	},
+	"children":[{
+		"id":11,
+		"text":"百度翻译",
+		"iconCls":"icon-baidu-translate",
+		"attribute":{
+			"url":"https://fanyi.baidu.com"
+		}
+	},{
+		"id":11,
+		"text":"百度文库",
+		"iconCls":"icon-baidu-article",
+		"attribute":{
+			"url":"https://wenku.baidu.com/"
+		}
+	}]
+}]
+
+--------------------------静态树创建--------------------------------------------
+静态树就是所有的节点内容都已经确定好了。
+
+
+
+
+--------------------------属性列表------------------------------
+cascadeCheck：是否为层叠选中状态，在选择下级节点时，相对应的父节点也会自动选中，这就是层叠选中效果。
+onlyLeafCheck：是否在末级节点前显示复选框
+lines：是否显示树控件上的虚线
+dnd：是否启用拖拽功能
+animate：节点在展开或折叠时是否显示动画效果
+filter：定义了如何过滤当前树数组，可传入两个参数：q表示doFilter方法中的参数，node表示节点。
+		 注意：该属性必须和doFilter方法一起配合使用，否则没有过滤效果。
+checkbox：是否在节点之前显示复选框
+	第一种写法：checkbox:true,
+	第二种写法：checkbox:function(node){
+					if(node.text=='江苏省' || node.text=='苏州市')
+						return true;
+				}
+formatter：如何渲染节点文本
+	formatter:function(node){
+		var s = node.text;
+		if(node.children){
+			s+='&nbsp;<span style="color:red;">('+node.children.length+')</span>';
+		}
+		console.log(s);
+		return s;
+	}
+loader：该属性用于定义如何通过AJAX从远程服务器加载数据，返回false可取消加载操作。其使用方法和panel面板中的loader属性完全一样
+		param：发送给远程服务器的参数对象，具体包括queryParams属性设置的参数以及展开分支时自动发送的id参数。
+		success(data)：在检索数据成功的时候调用的回调函数。
+		error()；在检索失败的时候调用的回调函数。
+		loader:function(param,success,error){
+			var id = param.id ||0;
+			$.ajax({
+				url:'',
+				dataType:'json',
+				method:'post',
+				data:{
+					id:id
+				},
+				success:function(data){
+					
+				}
+			});
+		}
+loadFilter：对数据过滤后的提示，它不仅对通过url或loader方法动态生成的树有过滤效果，对data生成的静态树一样有效
+
+--------------------------方法列表------------------------------
+tree中的方法一般都是对节点(node)进行操作。节点属性：id、text、childred等各种属性（node属性与tree属性是不一样的），实际上，节点对象
+还有一个很常用的属性target，该属性用于返回指定节点在页面中所对应的标签元素（也就是目标Dom对象）。
+
+-----------获取节点对象方法
+
+getRoots：获取所有的根节点对线数组
+getRoot：获取根节点的第一个节点对象，也可根据参数获取指定的对象，不带参数时，仅获取根节点的第一个节点对象；带参数时，则可获取指定
+		 的节点对象，参数类型为nodeEl（也就是指定节点的DOM元素）。
+		 如：获取第二个根节点对象。
+		 var e1=$('#et>li:eq(1)').html();
+		 var node=$('#et').tree('getRoot',el);
+		 $('#et').tree('select',node.target);
+find：根据id查找指定节点并返回节点对象。
+	$('#et').tree('find',4);
+getSelected：获取已经选择的节点对象，如果未选择，则返回null。
+getChecked：获取所有选中的节点对象数组。参数：checked(选中)、unchecked(未选中)、indeterminate(不确定)，默认为checked。
+
+getParent：获取指定节点的父节点对象。
+	
+getChildren：获取指定节点的所有子节点对象数组。
+	如：通过gerRoots和getChildren方法的结合，可以遍历所有节点：
+	var roots = $('#et').tree('getRoots');
+	for(var i = 0;i<roots.length;i++){
+		console.log(roots[i].text);
+		var children = $('#et').tree('getChildren',roots[i].target);
+		for(var j = 0;j<children.length;j++){
+			console.log("childred["+(j+1)+"]:"+children[j].text);
+		}
+	}
+-----------操作节点对象方法
+select：选择指定的节点对象，方法参数为DOM对象
+check：选中指定节点的复选框
+uncheck：取消选中指定节点的复选框
+collapse：折叠指定节点下的所有子节点
+	 $('#et').tree('collapse',$('#et').tree('getRoot').children[1].target);
+expand：展开指定节点下的所有子节点
+collapseAll：折叠指定节点下的所有节点，不带参数时，折叠所有节点
+	$('#et').tree('collapseAll');
+	$('#et').tree('collapseAll',$('#et').tree('getRoot').target);
+expandAll：展开指定节点下的所有节点，不带参数时，展开所有节点
+expandTo：展开从跟节点到指定节点之间的所有节点。
+scrollTo：滚动到指定的节点。
+toggle：分支节点触发器，也就是在展开和折叠之间切换。
+	$('#et').tree('toggle',$('#et').tree('getRoots')[0].target);
+insert：在一个指定节点之前或之后插入节点。该方法参数对象可包含如下属性：
+		before：DOM对象，在某个节点之前插入。
+		after：DOM对象，在某个节点之后插入。
+		data：对象数组，表示要插入的节点数据
+	var node = $('#et').tree('getRoots')[2];
+	$('#et').tree('insert',{
+		after:node.target,
+		data:[{
+			 "text":node.text,
+			"children":[{
+				"text":"阳江市"
+			},{
+				"text":"清远市"
+			}]
+		}]
+	});
+append：追加若干个节点到一个父节点，该方法需要用到两个属性：
+		1.parent：用于指定被追加子节点的父节点。如果不指定，子节点将被追加至根节点。
+		2。data：数组，表示要追加的节点数据。
+	var node = $('#et').tree('getRoots')[2];
+	$('#et').tree('append',{
+		parent:node.target,
+		data:[{
+			"text":"阳江市"
+		},{
+			"text":"清远市"
+		}]
+	});
+update：更新指定的节点，参数为对象，node中所有常用属性值都可使用该方法进行修改更新，如：id、text、iconCls、checked、state等。
+	var node = $('#et').tree('getRoots')[0].children[0].children[0];
+	$('#et').tree('update',{
+		target:node.target,
+		iconCls:'icon-add'
+	});
+remove：移除指定的节点
+	$('#et').tree('remove',node.target);
+pop：移除指定的节点，并返回被移除的节点数据
+	var node = $('#et').tree('getRoots')[3];
+	var reNode = $('#et').tree('getRoots')[0];
+	var removeNode = $('#et').tree('pop',node.target);
+	$('#et').tree('insert',{
+		after:reNode.target,
+		data:removeNode
+	});
+doFilter：过滤操作，和filter属性功能类似。该方法和属性filter配套使用的，仅对本地数据有效。
+	如果在filter属性中设置了过滤条件，则doFilter中必须将参数设置为空字符串，以清除过滤器。
+		$('et').tree('doFilter','');
+	如果没有在filter属性中设置过滤条件，可以在本地方法中设置，然后在filter中引用。
+		$('et').tree('doFilter','南京市');
+		在filter中做一些设置：filter:function(q,node){
+			return node.text==q?true:false;
+		}这里q返回就是doFilter方法中的参数值。
+
+-----------其他方法
+
+isLeaf：判断指定的节点是否为叶子节点，返回false时表示含有下级节点
+options：返回树控件属性
+
+
+--------------------------事件列表------------------------------
+onClick：点击节点时触发
+onDblClick：双击节点时触发
+onBeforeLoad：请求加载远程数据之前出发，返回false取消加载
+onLoadSuccess：在数据加载成功时触发
+	onLoadSuccess:function(node,data){
+		$(this).tree('expandAll');
+	}
+onExpand：节点展开时触发
+onBeforeExpand：节点展开之前出发，返回false可取消展开
+onContextMenu：邮件单击节点时触发，一般用户弹出右键菜单。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

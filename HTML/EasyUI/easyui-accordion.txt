@@ -1,0 +1,58 @@
+分类选项卡和tabs类似，都是允许用户使用多个模板，但从展示效果上来说，tabs是横向展示，而accordion侧重于纵向展示。
+
+----------------------------------------------属性-----------------------------------------------------------
+multiple：是否允许同时展开多个面板
+animate：展开和折叠时是否显示动画效果
+border：是否显示边框
+fit：分类容器大小是否自适应父容器
+halign：将选项卡头部垂直显示，可选值：left、right、top
+
+
+----------------------------------------------事件方法-----------------------------------------------------------
+onSelect：面板选中时触发
+onAdd：添加新面板时触发
+onBeforeRemove：移除面板之前出发。返回false可以取消移除操作。
+onRemove：面板被移除时触发。
+
+----------------------------------------------方法-----------------------------------------------------------
+panels：获取所有的面板
+resize：恢复分类组件大小
+getSelected：获取选中的面板
+getSelections：获取所有选中的面板
+getPanel：获取指定面板，参数可以是面板的标题或者索引
+	如：var panel = $('#aa').accordion('getPanel',1);
+		if(!panel){
+			alert("面板不存在");
+		}
+getPanelIndex：获取指定面板的索引
+	如：var index = $('#aa').accordion('getPanelIndex',panel);
+remove：移除指定面板，参数可以是面板的标题或索引。
+add：添加一个新的面板，方法参数完全参考panel面板中的属性来进行设置即可。默认情况下，新增的面板会自动变成当前展开的面板。
+	如：$('#aa').accordion('add',{
+				title:'新增面板',
+				closable:true,
+				selected:true,
+				iconCls:'icon-reload'
+			});
+
+
+
+
+注意：尽管tabs和accordion都可以通过getSelected，getTab或getPanel等方法来获取面板对象，但tabs必须使用update方法才能更改标题信息，而accordion就不需要
+	  可以直接使用panel中的所有属性和方法来对它进行操作。而且，它也同样扩展了一个selectd属性。
+	  var getPanel = $('#aa').accordion('getPanel',1);
+		if(getPanel){
+			getPanel.panel({
+				title:'新标题',
+				iconCls:'icon-add',
+				selected:true,
+				tools:[{
+					iconCls:'icon-remove',
+					handler:function(){
+						$('#aa').accordion('remove',2);
+					}
+				}]
+				
+			});
+		}
+		

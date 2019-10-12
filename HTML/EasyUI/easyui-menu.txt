@@ -1,0 +1,103 @@
+菜单和tree有点类似，可以创建多个同级或下级菜单项；每个菜单项和树中的节点一样，也都拥有自己的各种属性。
+	<div id="mm" class="easyui-menu" style="width:120px;">
+		<div data-options="iconCls:'icon-cut'">剪切</div>
+		<div data-options="iconCls:'icon-save'">保存</div>
+		<div data-options="iconCls:'icon-add'">添加</div>
+		<div data-options="iconCls:'icon-edit'">编辑</div>
+	</div>
+在浏览器刷新时，竟然是一片空白，什么内容都没有输出！这是因为，在菜单初始被创建时，默认是隐藏的
+$(function(){
+	$(document).on('contextmenu',function(e){
+		e.preventDefault();
+		$('#mm').menu('show',{
+			left:e.pageX,
+			top:e.pageY
+		});
+	});
+});
+这里我们将整个页面绑定了contextmenu事件，在鼠标右击时阻止了默认快捷菜单。
+
+1.如何给菜单项增加分割线
+	<div id="mm" class="easyui-menu" style="width:120px;">
+		<div data-options="iconCls:'icon-cut'">剪切</div>
+		<div data-options="iconCls:'icon-save'">保存</div>
+		<div data-options="iconCls:'icon-add'">添加</div>
+		<div class="menu-sep"/>
+		<div data-options="iconCls:'icon-edit'">编辑</div>
+	</div>
+2.如何添加下级菜单
+	<div id="mm" class="easyui-menu" style="width:120px;">
+		<div data-options="iconCls:'icon-cut'">剪切</div>
+		<div data-options="iconCls:'icon-save'">保存</div>
+		<div data-options="iconCls:'icon-add'">添加</div>
+		<div data-options="iconCls:'icon-edit'">编辑</div>
+		<div data-options="iconCls:'icon-open'">打开
+			<div>
+				<div id="cs">Word</div>
+				<div>Excel</div>
+			</div>
+		</div>
+	</div>
+
+-------------------------------------------菜单项属性-----------------------------------------------------
+id：菜单项的id
+text：菜单项显示的文本内容
+iconCls：
+href：单击菜单项时的打开页面地址
+disabled：菜单项是否不可用
+onclick：单击菜单项时执行的事件。
+-------------------------------------------菜单属性-----------------------------------------------------
+align：菜单对齐方式，可用值：left和right。
+minWidth：菜单的最小宽度
+itemHeight：菜单项高度
+fit：菜单尺寸是否自动适配父容器
+noline：是否不显示图标和文字之间的分割线
+hideOnUnhover：鼠标离开菜单时是否自动隐藏菜单
+duration：隐藏菜单动画的持续时间，以毫秒为单位。
+inline：是否相对于父级标签定位，为false时相对于body定位
+left：菜单显示的左边距位置
+top：菜单显示的上边距位置
+zIndex：菜单在页面元素中的层叠顺序，数值越大，越靠上层
+
+-------------------------------------------菜单方法-----------------------------------------------------
+show：显示菜单到指定的位置。方法参数有两个属性：left和top。
+hide：隐藏菜单
+destroy：销毁菜单
+getItem：通过选择器获取指定菜单项的DOM元素对象
+findItem：通过文本内容获取指定菜单项的DOM元素对象
+	如：获取指定的菜单项：1.如果菜单项有id或class类名，可以使用getItem方法。
+		$('#mm').menu('getItem','#cs');
+		2.如果菜单项没有id或class，可以直接根据菜单项的文本内容来获取，方法为findItem
+		$('#mm').menu('findItem','Word');
+setText：设置指定菜单项的文本。方法参数包括两个属性：target和text。
+	var item = $('#mm').menu('getItem','#cs');
+	$('#mm').menu('setText',{
+		target:item.target,
+		text:'测试'
+	});
+setIcon：设置指定菜单项的图标。方法参数包括两个属性：target和iconCls。
+appendItem：追加新的菜单项
+	var item = $('#mm').menu('findItem','打开');
+	var newitem = $('#mm').menu('findItem','打印');
+	if(!newitem){
+		$('#mm').menu('appendItem',{
+			parent:item.target,
+			text:'打印',
+		//	separator: true,
+			onclick:function(){alert('这是刚追加的菜单项')}
+		});
+	}
+	对象中的属性parent为可选项，省略时将添加到根级菜单中，否则添加到指定的父项菜单中。
+removeItem：移除指定的菜单项
+enableItem：启用指定菜单项
+disableItem：禁用指定菜单项
+showItem：显示指定菜单项
+hideItem：隐藏指定菜单项
+resize：重置指定的菜单项。不带菜单时则重置整个菜单。
+-------------------------------------------菜单事件-----------------------------------------------------
+
+
+
+
+
+

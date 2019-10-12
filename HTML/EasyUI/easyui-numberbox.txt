@@ -1,0 +1,71 @@
+数值输入框扩展自textbox，它用来限制用户只能输入数值类型数据。
+
+--------------------------------属性-------------------------
+min：允许的最小值
+max：允许的最大值
+precision：小数取值精度，设置为0表示整数。
+decimalSeparator：整数和小数之间的分隔符
+groupSeparator：整数组分隔符
+prefix：前缀字符，如$或￥
+suffix：后缀字符
+formatter：格式化数值函数，返回的内容仅供显示
+parser：解析显示的字符串，返回的是数值
+filter：如何过滤按键，返回false时禁止输入
+--------------------------------方法-------------------------
+fix：将输入框中的值修正为有效的值。
+
+
+----------------------------------------------------------------------------------
+<script>
+		$(function(){
+			$('#n').numberbox({
+				width:300,
+				label:'请输入数值：',
+				labelWidth:80,
+				value:12345.6789,
+				precision:2,
+				groupSeparator:',',
+				suffix:'%',
+				buttonText:'测试',
+				onClickButton:function(){
+					var v = $(this).numberbox('getValue');
+					alert(v);
+				},
+			});
+		});
+	</script>
+</head>
+<body>
+	<input id="n"/>
+</body>
+从运行结果上，precision具有四舍五入的作用，而且能直接改变最终的值。
+与precision不同的，decimalSeparator、groupSeparator、prefix、suffix等属性仅仅只是改变数值的显示格式，并不会改变最终的数值。
+
+使用formatter修改数值显示格式，时间代码的传入参数为焦点离开或者回车确认时的值。
+formatter:function(value){
+	if(isNaN(value))
+		return null;
+	var resule = (value*100).toString();
+	index = result.indexOf('.');
+	if(index == -1){
+		result+=".00%";
+	}else if(result.substr(index+1).length==1){
+		result+="0%";
+	}else{
+		result = result.substr(0,index+3)+"%";
+	}
+	return result;
+}
+以上代码对输入的数据进行百分比转换，并保留两位小数。
+bug:在将光标移动到输入框，没回车一次，就会发现数据变化一次。而变化的规律就是：将当前编辑框中的显示值不断按formmater中定义
+	的代码进行计算，从而生成新的值。
+解决该问题，需要使用parser属性对显示的字符串进行解析：
+	parser:function(s){
+		var str = s.toString();
+		if(str.indexOf('%') == -1)
+			return s;
+		else{
+			var v = str.replace('.00%','').replace('.0%','').replace('%','');
+			return parseFloat(v)/100;
+		}
+	}

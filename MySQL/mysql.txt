@@ -1,0 +1,37 @@
+查询账户类型为‘B’的账户ID、税务号码和开设此账户的柜员姓名：
+第一种写法：
+	select a.account_id,c.fed_id,e.fname,e.lname from account a
+	inner join customer c on a.cust_id=c.cust_id
+	inner join employee e on a.open_emp_id=e.emp_id
+	where c.cust_type_cd='B';
+第二种写法：
+	select a.account_id,c.fed_id,e.fname,e.lname from customer c
+	inner join account a on a.cust_id=c.cust_id
+	inner join employee e on a.open_emp_id=e.emp_id
+	where c.cust_type_cd='B';
+第三种写法：
+	select a.account_id,c.fed_id,e.fname,e.lname from employee e
+	inner join account a on e.emp_id=a.open_emp_id
+	inner join customer c on a.cust_id=c.cust_id
+	where c.cust_type_cd='B';
+
+上面的3条SQL语句执行的结果是相同的，表的连接顺序完全不相同。
+表的连接顺序重要吗？
+	SQL是一种非过程化的语言，也就是说只需要描述要获取的数据库对象，而如何获取以最好的方式执行查询则由数据库服务器负责。
+	服务器根据所收集的数据库对象信息，在3个表中选择一个作为开始点（所选择的表被称为驱动表），然后确定连接其他表的顺序。因此
+	，在from子句中各表出现的顺序并不重要。
+在查询中如何以特定的顺序连接各表？
+	如果需要将表按照所需要的顺序排列好，然后指定MySQL中的STRAIGHT_JOIN关键字，或者在SQL Server中的FORCE ORDER选项，或者在Oracle数据库中使用
+	ORDERED或LEADING优化器提示。
+	如：select straight_join a.account_id,c.fed_id,e.fname,e.lname from customer c
+		inner join account a on a.cust_id=c.cust_id
+		inner join employee e on a.open_emp_id=e.emp_id
+		where c.cust_type_cd='B';
+		
+		使用explain查看是否依照我想要的顺序进行关联的：
+			explain select straight_join a.account_id,c.fed_id,e.fname,e.lname from customer c
+			inner join account a on a.cust_id=c.cust_id
+			inner join employee e on a.open_emp_id=e.emp_id
+			where c.cust_type_cd='B';
+		
+		

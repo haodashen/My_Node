@@ -1,0 +1,31 @@
+对话框扩展于窗口，他实际上就是窗口的基础上做了一些定制而已。
+
+-------------------------------------属性-------------------------------------
+toolbar：该属性用于设置对话框窗口的顶部工具栏，属性值可以是数组，也可是是选择器。
+	$('#d').dialog({
+		title:,
+		height:,
+		width:,
+		toolbar:[{
+			text:'Add',
+			iconCls:'icon-add',
+			handler:function(){
+				alert("Add");
+			}
+		},'-',{
+			text:'Remove',
+			iconCls:'icon-remove',
+			handler:function(){
+				alert("Remove");
+			}
+		}],
+	});
+	这里的'-'表示在工具栏之间添加分隔符
+buttons：用于设置对话框窗口的底部按钮栏。
+	buttons:[{
+			text:'Add',
+			iconCls:'icon-add',
+			handler:function(){
+				alert("Add");
+			}
+	},]
